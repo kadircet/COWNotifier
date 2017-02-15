@@ -1,4 +1,6 @@
 from nntplib import NNTP_SSL, NNTP
+import email
+import email.policy as policy
 
 class newsReader:
     def __init__(self, host, port, uname, pw):
@@ -27,28 +29,18 @@ class newsReader:
         (_, _, first, last, _) = self.conn.group(topic)
         start = max(self.groups[topic]+1, first)
         res = []
-        headers = ["from:", "newsgroups:", "subject:", "date:"]
+        headers = ("From", "Newsgroups", "Subject", "Date")
         while start<=last:
             artic = self.conn.article(start)[1]
-            coding = 'iso-8859-9'
-            for x in artic.lines:
-                if x.decode('utf-8').lower().startswith('subject:'):
-                    if 'utf-8' in x.decode('utf-8').lower():
-                        coding = 'utf-8'
-                    break
-            artic = [x.decode(coding).strip() for x in artic.lines]
+            raw_msg = b'\r\n'.join(artic.lines)
+            mime_msg = email.message_from_bytes(raw_msg, policy=policy.default)
             msg = ""
-            data = False
-            for line in artic:
-                if data:
-                    msg+=line+"\r\n"
-                    continue
-                for h in headers:
-                    if line.lower().startswith(h):
-                        msg+=line+"\r\n"
-                else:
-                    if line=="":
-                        data=True
+            for h in headers:
+                msg += "%s: %s\r\n" % (h, mime_msg[h])
+            for part in mime_msg.walk():
+                if part.get_content_type() == 'text/plain':
+                    msg += part.get_content()
+                    break
             res.append(msg)
             start+=1
         self.groups[topic] = last
