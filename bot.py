@@ -102,11 +102,11 @@ class cowBot(threading.Thread):
         self.sendMsg(data['cid'], msg)
 
     def makeRequest(self, data):
-        print(self.url, data)
         r = requests.post(self.url, json=data)
-        r = r.json()
-        print(r)
-        return r["ok"] == True
+        res = r.json()
+        if res["ok"]!=True:
+            print(data, res)
+        return res["ok"] == True
 
     def setWebhook(self, url, pubkey):
         data = {}
@@ -121,7 +121,6 @@ class cowBot(threading.Thread):
         if resp == False:
             print("Failed to set webhook!")
             sys.exit(1)
-        print("Webhook is set!")
 
     def registerTexts(self):
         self.texts = {}
@@ -204,7 +203,8 @@ or use "/delete metu.ceng.course.100" to delete any course from your list"""
             self.sendMsg(cid, "Master didn't implement it yet!")
             return
         
-        self.handlers['start'](data,False)
+        if cmd!='start':
+            self.handlers['start'](data,False)
         self.handlers[cmd](data)
 
     def run(self):
