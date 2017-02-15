@@ -12,16 +12,21 @@ is self-explanatory. Then run driver.py.
 
 ### Bot Side
 /start - Create a record within the server for the followlist
+
 /add TOPICNAME - Adds topic to your followlist, in addition to exact
-				 topic name, it also tries to match the name by prepending
-				 metu.ceng. or metu.ceng.course. to the given parameter,
-				 a spesific help for METU CENG users. Can be tweaked within
-				 newsreader.py's closest fuction.
+                 topic name, it also tries to match the name by prepending
+                 metu.ceng. or metu.ceng.course. to the given parameter,
+                 a spesific help for METU CENG users. Can be tweaked within
+                 newsreader.py's closest fuction.
+
 /delete TOPICNAME - Deletes given topic from your followlist
+
 /list - Shows your followlist entries.
+
 /help - Prints out command's and basic info about usage
 
 ---
+
 There's a working bot telegram.me/cownotifbot but it's only available to
 metu ceng newsgroup, you can simply create a new bot and give token to
 server's config and create a bot for your own server.
