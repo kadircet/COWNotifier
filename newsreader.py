@@ -1,6 +1,8 @@
 from nntplib import NNTP_SSL, NNTP
 import email
-import email.policy as policy
+from email.policy import EmailPolicy
+from email.headerregistry import HeaderRegistry, UnstructuredHeader
+
 
 class newsReader:
     def __init__(self, host, port, uname, pw):
@@ -30,10 +32,13 @@ class newsReader:
         start = max(self.groups[topic]+1, first)
         res = []
         headers = ("From", "Newsgroups", "Subject", "Date")
+        registry = HeaderRegistry()
+        registry.map_to_type('From', UnstructuredHeader)
+        policy = EmailPolicy(header_factory=registry)
         while start<=last:
             artic = self.conn.article(start)[1]
             raw_msg = b'\r\n'.join(artic.lines)
-            mime_msg = email.message_from_bytes(raw_msg, policy=policy.default)
+            mime_msg = email.message_from_bytes(raw_msg, policy=policy)
             msg = ""
             for h in headers:
                 msg += "%s: %s\r\n" % (h, mime_msg[h])
