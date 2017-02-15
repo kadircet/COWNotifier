@@ -1,0 +1,5 @@
+*.pem
+*.pyc
+__pycache__/
+*.csr
+*.ini
