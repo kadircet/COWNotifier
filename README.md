@@ -20,6 +20,7 @@ is self-explanatory. Then run driver.py.
 /delete TOPICNAME - Deletes given topic from your followlist
 /list - Shows your followlist entries.
 /help - Prints out command's and basic info about usage
+
 ---
 There's a working bot telegram.me/cownotifbot but it's only available to
 metu ceng newsgroup, you can simply create a new bot and give token to
