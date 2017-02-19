@@ -1,6 +1,7 @@
 import traceback
 import threading
 import MySQLdb
+import datetime
 
 class dataBase:
     def __init__(self, host, uname, pw, dbname, rdr):
@@ -18,13 +19,13 @@ class dataBase:
         res = 0
         try:
             cur.execute(sql, (uid, cid, uname,))
-            self.conn.commit()
         except MySQLdb.IntegrityError:
             res = 1
         except Exception as e:
-            print(e)
+            print(e, datetime.datetime.now())
             traceback.print_exc()
             res = 2
+            self.conn.commit()
         cur.close()
         self.lock.release()
         return res
@@ -40,13 +41,13 @@ class dataBase:
         res = 0
         try:
             cur.execute(sql, (cid, topic,))
-            self.conn.commit()
         except MySQLdb.IntegrityError:
             res = 1
         except Exception as e:
-            print(e)
+            print(e, datetime.datetime.now())
             traceback.print_exc()
             res = 3
+            self.conn.commit()
         cur.close()
         self.lock.release()
         return res
@@ -60,13 +61,13 @@ class dataBase:
         res = 0
         try:
             cnt=cur.execute(sql, (cid, topic,))
-            self.conn.commit()
             if cnt==0:
                 res = 1
         except Exception as e:
-            print(e)
+            print(e, datetime.datetime.now())
             traceback.print_exc()
             res = 3
+            self.conn.commit()
         cur.close()
         self.lock.release()
         return res
@@ -78,13 +79,13 @@ class dataBase:
         res = []
         try:
             cur.execute(sql, (cid,))
-            self.conn.commit()
             for row in cur:
                 res.append(row[0])
         except Exception as e:
-            print(e)
+            print(e, datetime.datetime.now())
             traceback.print_exc()
             res = None
+            self.conn.commit()
         cur.close()
         self.lock.release()
         return res
@@ -98,7 +99,6 @@ class dataBase:
         res = []
         try:
             cur.execute(sql)
-            self.conn.commit()
             for row in cur:
                 cur2.execute(sql2, (row[0],))
                 cids = []
@@ -106,9 +106,10 @@ class dataBase:
                     cids.append(cid[0])
                 res.append([row[0],cids])
         except Exception as e:
-            print(e)
+            print(e, datetime.datetime.now())
             traceback.print_exc()
             res = None
+            self.conn.commit()
         cur.close()
         self.lock.release()
         return res

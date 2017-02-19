@@ -1,5 +1,7 @@
 import os
 import json
+import datetime
+import traceback
 import queue
 from bot import cowBot
 from server import webHook
@@ -16,13 +18,17 @@ def getConf(storage):
     return conf
 
 def main():
-    conf = getConf('conf.ini')
-    q = queue.Queue()
-    bot = cowBot(conf, q)
-    wh = webHook(conf, q)
-    bot.start()
-    wh.start()
-    bot.join()
+    try:
+        conf = getConf('conf.ini')
+        q = queue.Queue()
+        bot = cowBot(conf, q)
+        wh = webHook(conf, q)
+        bot.start()
+        wh.start()
+        bot.join()
+    except Exception as e:
+        print(e, datetime.datetime.now())
+        traceback.print_exc()
 
 if __name__=='__main__':
     main()

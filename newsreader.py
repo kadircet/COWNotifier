@@ -17,12 +17,9 @@ class newsReader:
         return topic in self.groups
 
     def closest(self, topic):
-        tmp = "metu.ceng."+topic
-        if tmp in self.groups:
-            return tmp
-        tmp = "metu.ceng.course."+topic
-        if tmp in self.groups:
-            return tmp
+        for t in self.groups:
+            if t.endswith(topic):
+                return t
         return None
 
     def updateTopic(self, topic):

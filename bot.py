@@ -1,4 +1,5 @@
 import traceback
+import datetime
 import requests
 import sys
 import time
@@ -12,6 +13,7 @@ class cowBot(threading.Thread):
     def __init__(self, conf, q):
         threading.Thread.__init__(self)
         self.token = conf['bot']['token']
+        self.conf = conf
         self.q = q
         self.rdr = newsReader(conf['news']['host'], conf['news']['port'], conf['news']['user'], conf['news']['pass'])
         self.db = dataBase(conf['db']['host'], conf['db']['user'], conf['db']['pass'], conf['db']['name'], self.rdr)
@@ -24,6 +26,7 @@ class cowBot(threading.Thread):
     def updateTopics(self):
         while True:
             try:
+                self.db.ping()
                 entries = self.db.getTopics()
                 for entry in entries:
                     topic = entry[0]
@@ -32,11 +35,12 @@ class cowBot(threading.Thread):
                         for msg in res:
                             self.sendMsg(cid, msg)
             except Exception as e:
-                print(e)
+                print(e, datetime.datetime.now())
                 traceback.print_exc()
             time.sleep(1)
 
     def startHandler(self, data, reply=True):
+        self.db.ping()
         res = self.db.registerUser(data['uid'], data['cid'], data['uname'])
         msg = self.texts['error'].format(data['uname'])
         if res==0:
@@ -57,6 +61,7 @@ class cowBot(threading.Thread):
             return
 
         topic = text[1]
+        self.db.ping()
         res = self.db.addTopic(data['cid'], topic)
 
         msg = self.texts['error'].format(data['uname'])
@@ -76,6 +81,7 @@ class cowBot(threading.Thread):
             return
 
         topic = text[1]
+        self.db.ping()
         res = self.db.deleteTopic(data['cid'], topic)
 
         msg = self.texts['error'].format(data['uname'])
@@ -89,6 +95,7 @@ class cowBot(threading.Thread):
         self.sendMsg(data['cid'], msg)
 
     def listHandler(self, data):
+        self.db.ping()
         res = self.db.getTopicsByCid(data['cid'])
         if res == None:
             msg = self.texts['error'].format(data['uname'])
@@ -103,6 +110,7 @@ class cowBot(threading.Thread):
 
     def makeRequest(self, data):
         r = requests.post(self.url, json=data)
+        print("Request:", data)
         res = r.json()
         if res["ok"]!=True:
             print(data, res)
@@ -153,14 +161,13 @@ or use "/delete metu.ceng.course.100" to delete any course from your list"""
         data['text'] = text
         res=self.makeRequest(data)
         return res
-        #if self.makeRequest(data)==False:
-        #    print("Msg sent failed")
-        #else:
-        #    print("Sent:",text,cid)
 
     def parse(self, data):
         res = {}
-        msg = data['message']
+        if 'message' in data:
+            msg = data['message']
+        elif 'edited_message' in data:
+            msg = data['edited_message']
         cht = msg['chat']
         frm = msg['from']
         cid = cht['id']
