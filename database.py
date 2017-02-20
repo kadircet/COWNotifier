@@ -12,6 +12,9 @@ class dataBase:
     def close(self):
         self.conn.close()
 
+    def ping(self):
+        self.conn.ping()
+
     def registerUser(self, uid, cid, uname):
         sql = "INSERT INTO `users` (uid, cid, uname) VALUES (%s,%s,%s)"
         self.lock.acquire()
