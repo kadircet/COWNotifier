@@ -2,7 +2,7 @@ from nntplib import NNTP_SSL, NNTP
 import email
 from email.policy import EmailPolicy
 from email.headerregistry import HeaderRegistry, UnstructuredHeader
-
+import html
 
 class newsReader:
     def __init__(self, host, port, uname, pw):
@@ -42,7 +42,7 @@ class newsReader:
             msg+= "</code>\r\n"
             for part in mime_msg.walk():
                 if part.get_content_type() == 'text/plain':
-                    msg += part.get_content().replace('<', '&lt;').replace('>', '&gt;')
+                    msg += html.escape(part.get_content())
                     break
             res.append(msg)
             start+=1
