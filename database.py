@@ -28,7 +28,7 @@ class dataBase:
             print(e, datetime.datetime.now())
             traceback.print_exc()
             res = 2
-            self.conn.commit()
+        self.conn.commit()
         cur.close()
         self.lock.release()
         return res
@@ -50,7 +50,7 @@ class dataBase:
             print(e, datetime.datetime.now())
             traceback.print_exc()
             res = 3
-            self.conn.commit()
+        self.conn.commit()
         cur.close()
         self.lock.release()
         return res
@@ -70,7 +70,7 @@ class dataBase:
             print(e, datetime.datetime.now())
             traceback.print_exc()
             res = 3
-            self.conn.commit()
+        self.conn.commit()
         cur.close()
         self.lock.release()
         return res
@@ -88,7 +88,7 @@ class dataBase:
             print(e, datetime.datetime.now())
             traceback.print_exc()
             res = None
-            self.conn.commit()
+        self.conn.commit()
         cur.close()
         self.lock.release()
         return res
@@ -112,7 +112,7 @@ class dataBase:
             print(e, datetime.datetime.now())
             traceback.print_exc()
             res = None
-            self.conn.commit()
+        self.conn.commit()
         cur.close()
         self.lock.release()
         return res

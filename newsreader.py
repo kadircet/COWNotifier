@@ -36,12 +36,13 @@ class newsReader:
             artic = self.conn.article(start)[1]
             raw_msg = b'\r\n'.join(artic.lines)
             mime_msg = email.message_from_bytes(raw_msg, policy=policy)
-            msg = ""
+            msg = "<code>"
             for h in headers:
                 msg += "%s: %s\r\n" % (h, mime_msg[h])
+            msg+= "</code>\r\n"
             for part in mime_msg.walk():
                 if part.get_content_type() == 'text/plain':
-                    msg += part.get_content()
+                    msg += part.get_content().replace('<', '&lt;').replace('>', '&gt;')
                     break
             res.append(msg)
             start+=1

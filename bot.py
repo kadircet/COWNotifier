@@ -159,6 +159,7 @@ or use "/delete metu.ceng.course.100" to delete any course from your list"""
         data['method'] = 'sendMessage'
         data['chat_id'] = cid
         data['text'] = text
+        data['parse_mode'] = 'HTML'
         res=self.makeRequest(data)
         return res
 
