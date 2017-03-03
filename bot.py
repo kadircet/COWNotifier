@@ -15,7 +15,7 @@ class cowBot(threading.Thread):
         self.token = conf['bot']['token']
         self.conf = conf
         self.q = q
-        self.rdr = newsReader(conf['news']['host'], conf['news']['port'], conf['news']['user'], conf['news']['pass'])
+        self.rdr = newsReader(conf['news']['host'], conf['news']['port'], conf['news']['user'], conf['news']['pass'], conf['news']['last'])
         self.db = dataBase(conf['db']['host'], conf['db']['user'], conf['db']['pass'], conf['db']['name'], self.rdr)
 
         self.url = 'https://api.telegram.org/bot%s/' % self.token

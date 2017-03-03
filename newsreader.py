@@ -3,14 +3,25 @@ import email
 from email.policy import EmailPolicy
 from email.headerregistry import HeaderRegistry, UnstructuredHeader
 import html
+import json
 
 class newsReader:
-    def __init__(self, host, port, uname, pw):
+    def __init__(self, host, port, uname, pw, lfile):
         self.conn = NNTP_SSL(host, port, uname, pw)
+        self.lfile = lfile
+        last = {}
+        try:
+            last = json.loads(open(lfile).read())
+        except:
+            pass
         self.groups = {}
         res = self.conn.list()[1]
         for g in res:
-            self.groups[g.group] = int(g.last)
+            if g.group in last:
+                self.groups[g.group] = last[g.group]
+            else:
+                self.groups[g.group] = int(g.last)
+        open(self.lfile,'w').write(json.dumps(self.groups))
 
     def close(self):
         self.conn.quit()
@@ -38,7 +49,7 @@ class newsReader:
             mime_msg = email.message_from_bytes(raw_msg, policy=policy)
             msg = "<code>"
             for h in headers:
-                msg += "%s: %s\r\n" % (h, mime_msg[h])
+                msg += "%s: %s\r\n" % (h, html.escape(mime_msg[h]))
             msg+= "</code>\r\n"
             for part in mime_msg.walk():
                 if part.get_content_type() == 'text/plain':
@@ -47,5 +58,6 @@ class newsReader:
             res.append(msg)
             start+=1
         self.groups[topic] = last
+        open(self.lfile,'w').write(json.dumps(self.groups))
         return res
 
