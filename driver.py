@@ -11,6 +11,7 @@ def getConf(storage):
     if os.path.exists(storage):
         return json.loads(open(storage, 'r').read())
     conf = {}
+<<<<<<< HEAD
     conf['bot'] = {'token': 'BOTTOKEN', 'url': 'https://example.com:8443/'}
     conf['web'] = {'cert': 'CERTFILE', 'pubkey': 'PUBKEYFILE'}
     conf['news'] = {
@@ -26,6 +27,14 @@ def getConf(storage):
         'name': 'DBNAME'
     }
     open(storage, 'w').write(json.dumps(conf))
+=======
+    conf['bot'] = {'token':'BOTTOKEN', 'url':'https://example.com:8443/'}
+    conf['web'] = {'cert':'CERTFILE', 'pubkey':'PUBKEYFILE'}
+    conf['news'] = {'host':'HOST', 'port':2050, 'user':'UNAME', 'pass':'PASS'}
+    conf['db'] = {'host':'HOST', 'user':'USER', 'pass':'PASS', 'name':'DBNAME'}
+    with open(storage, 'w') as f:
+        json.dump(conf, f) 
+>>>>>>> Modify JSON file operations
     return conf
 
 

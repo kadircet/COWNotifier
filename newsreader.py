@@ -28,7 +28,8 @@ class newsReader:
         self.time = time.time()
         last = {}
         try:
-            last = json.loads(open(self.lfile).read())
+            with open(self.lfile) as f:
+                last = json.load(f)
         except Exception as e:
             print(e, datetime.datetime.now())
             traceback.print_exc()
@@ -40,9 +41,14 @@ class newsReader:
                 print(g.group, last[g.group])
             else:
                 self.groups[g.group] = int(g.last)
+<<<<<<< HEAD
         open(self.lfile, 'w').write(json.dumps(self.groups))
         self.initialized = True
         print("INITIALIZED")
+=======
+        with open(self.lfile, 'w') as f:
+            json.dump(self.groups, f)
+>>>>>>> Modify JSON file operations
 
     def connect(self):
         try:
@@ -118,5 +124,10 @@ class newsReader:
                 traceback.print_exc()
             start += 1
         self.groups[topic] = last
+<<<<<<< HEAD
         open(self.lfile, 'w').write(json.dumps(self.groups))
+=======
+        with open(self.lfile, 'w') as f:
+            json.dump(self.groups, f)
+>>>>>>> Modify JSON file operations
         return res
