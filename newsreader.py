@@ -1,4 +1,4 @@
-from nntplib import NNTP_SSL, NNTP
+from nntplib import NNTP_SSL
 import traceback
 import threading
 import time
