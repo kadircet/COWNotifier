@@ -3,8 +3,6 @@ import datetime
 import requests
 import sys
 import time
-import json
-import queue
 import threading
 from database import dataBase
 from newsreader import newsReader
