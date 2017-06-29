@@ -6,6 +6,7 @@ import datetime
 class dataBase:
     def __init__(self, host, uname, pw, dbname, rdr):
         self.conn = MySQLdb.connect(host, uname, pw, dbname, charset='utf8')
+        self.params = [host, uname, pw, dbname]
         self.rdr = rdr
         self.lock = threading.Lock()
 
@@ -13,7 +14,10 @@ class dataBase:
         self.conn.close()
 
     def ping(self):
-        self.conn.ping()
+        try:
+            self.conn.ping()
+        except:
+            self.conn = MySQLdb.connect(self.params[0], self.params[1], self.params[2], self.params[3], charset='utf8')
 
     def registerUser(self, uid, cid, uname):
         sql = "INSERT INTO `users` (uid, cid, uname) VALUES (%s,%s,%s)"

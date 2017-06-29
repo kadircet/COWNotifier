@@ -108,13 +108,28 @@ class cowBot(threading.Thread):
 
         self.sendMsg(data['cid'], msg)
 
+    def listAll(self, data):
+        self.db.ping()
+        res = self.db.getTopicsByCid(data['cid'])
+        if res == None:
+            msg = self.texts['error'].format(data['uname'])
+        else:
+            msg = "\n".join(self.rdr.groups.keys())
+
+        self.sendMsg(data['cid'], msg)
+
     def makeRequest(self, data):
-        r = requests.post(self.url, json=data)
-        print("Request:", data)
-        res = r.json()
-        if res["ok"]!=True:
-            print(data, res)
-        return res["ok"] == True
+        try:
+            r = requests.post(self.url, json=data)
+            print("Request:", data)
+            res = r.json()
+            if res["ok"]!=True:
+                print(data, res)
+            return res["ok"] == True
+        except Exception as e:
+            print(e, datetime.datetime.now())
+            traceback.print_exc()
+        return False
 
     def setWebhook(self, url, pubkey):
         data = {}
@@ -151,16 +166,21 @@ or use "/delete metu.ceng.course.100" to delete any course from your list"""
                 'list': self.listHandler,
                 'start': self.startHandler,
                 'delete': self.deleteHandler,
-                'help': self.helpHandler
+                'help': self.helpHandler,
+                'listall': self.listAll
                 }
 
     def sendMsg(self, cid, text):
         data = {}
         data['method'] = 'sendMessage'
         data['chat_id'] = cid
-        data['text'] = text
         data['parse_mode'] = 'HTML'
-        res=self.makeRequest(data)
+        while len(text):
+            data['text'] = text[:4096]
+            text=text[4096:]
+            res=self.makeRequest(data)
+            if not res:
+                break
         return res
 
     def parse(self, data):
@@ -169,6 +189,8 @@ or use "/delete metu.ceng.course.100" to delete any course from your list"""
             msg = data['message']
         elif 'edited_message' in data:
             msg = data['edited_message']
+        if 'text' not in msg:
+            msg['text'] = "n n"
         cht = msg['chat']
         frm = msg['from']
         cid = cht['id']
