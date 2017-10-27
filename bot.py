@@ -157,7 +157,7 @@ class cowBot(threading.Thread):
         self.texts['deleted'] = """{} has been successfully deleted from your list"""
         self.texts['error'] = """Sorry {}, something went wrong, please try again"""
         self.texts['help'] = """You can add courses by "/add metu.ceng.course.100"
-or any other topic, by its exact name. Then you can use "/list" to list the added topics
+or any other topic, by any suffix. Then you can use "/list" to list the added topics
 or use "/delete metu.ceng.course.100" to delete any course from your list"""
 
     def registerHandlers(self):

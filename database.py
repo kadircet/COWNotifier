@@ -61,7 +61,9 @@ class dataBase:
 
     def deleteTopic(self, cid, topic):
         if not self.rdr.validTopic(topic):
-            return 2
+            topic = self.rdr.closest(topic)
+            if topic==None:
+                return 2
         sql = "DELETE FROM `topics` WHERE cid=%s AND topic=%s"
         self.lock.acquire()
         cur = self.conn.cursor()

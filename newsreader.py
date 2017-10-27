@@ -1,5 +1,6 @@
 from nntplib import NNTP_SSL, NNTP
 import traceback
+import threading
 import time
 import email
 import datetime
@@ -10,10 +11,13 @@ import json
 
 class newsReader:
     def __init__(self, host, port, uname, pw, lfile):
-        self.conn = NNTP_SSL(host, port, uname, pw)
-        self.time = time.time()
         self.conparams = [host, port, uname, pw]
         self.lfile = lfile
+        self.initialized = False
+        threading.Thread(target=self.initConnection)
+
+    def initConnection(self):
+        self.connect()
         last = {}
         try:
             last = json.loads(open(lfile).read())
@@ -27,6 +31,7 @@ class newsReader:
             else:
                 self.groups[g.group] = int(g.last)
         open(self.lfile,'w').write(json.dumps(self.groups))
+        self.initialized = True
 
     def connect(self):
         try:
@@ -34,8 +39,21 @@ class newsReader:
         except Exception as e:
             print(e, datetime.datetime.now())
             traceback.print_exc()
-        self.conn = NNTP_SSL(self.conparams[0], self.conparams[1], self.conparams[2], self.conparams[3])
-        self.time = time.time()
+        while True:
+            backoff = 1
+            try:
+                self.conn = NNTP_SSL(self.conparams[0], self.conparams[1], self.conparams[2], self.conparams[3])
+                self.time = time.time()
+                break
+            except TimeoutError as e:
+                time.sleep(backoff)
+                backoff=min(60, backoff*2)
+                print(e, datetime.datetime.now())
+                traceback.print_exc()
+            except Exception as e:
+                print(e, datetime.datetime.now())
+                traceback.print_exc()
+                break
 
     def close(self):
         self.conn.quit()
@@ -50,9 +68,17 @@ class newsReader:
         return None
 
     def updateTopic(self, topic):
+        if not self.initialized:
+            return []
         if time.time()-self.time>60.:
             self.connect()
-        (_, _, first, last, _) = self.conn.group(topic)
+        try:
+            (_, _, first, last, _) = self.conn.group(topic)
+        except Exception as e:
+            print(e, datetime.datetime.now())
+            traceback.print_exc()
+            self.connect()
+            return
         start = max(self.groups[topic]+1, first)
         res = []
         headers = ("From", "Newsgroups", "Subject", "Date")
