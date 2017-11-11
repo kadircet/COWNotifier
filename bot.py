@@ -95,6 +95,19 @@ class cowBot(threading.Thread):
 
         self.sendMsg(data['cid'], msg)
 
+    def announcementHandler(self, data):
+        if data['uid'] != 147926496:
+            return
+
+        text = data['txt'].split(' ')
+        if len(text) < 2:
+            self.sendMsg(data['cid'], self.texts['invalid'])
+            return
+        text = text[1]
+
+        for cid in self.db.getCids():
+            self.sendMsg(cid, text)
+
     def deleteHandler(self, data):
         text = data['txt'].split(' ')
         if len(text) < 2:
@@ -200,7 +213,8 @@ you can enable it using /noplus1 this feature is experimental. For any bugs and 
             'no+1': self.noPlusOne,
             'yes+1': self.yesPlusOne,
             'noplus1': self.noPlusOne,
-            'yesplus1': self.yesPlusOne
+            'yesplus1': self.yesPlusOne,
+            'announcement': self.announcementHandler
         }
 
     def sendMsg(self, cid, text):

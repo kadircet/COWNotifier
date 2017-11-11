@@ -102,19 +102,17 @@ class newsReader:
                 artic = self.conn.article(start)[1]
                 raw_msg = b'\r\n'.join(artic.lines)
                 mime_msg = email.message_from_bytes(raw_msg, policy=policy)
-                msg = "<code>"
+                hdr = "<code>"
                 for h in headers:
-                    msg += "%s: %s\r\n" % (h, html.escape(mime_msg[h]))
-                msg += "</code>\r\n"
+                    hdr += "%s: %s\r\n" % (h, html.escape(mime_msg[h]))
                 content = ""
                 for part in mime_msg.walk():
                     if part.get_content_type() == 'text/plain':
                         content += html.escape(part.get_content())
-
-
-#break
                 is_plus_one = isPlusOne(content)
-                res.append([is_plus_one, msg + content])
+                hdr += "%s: %s\r\n" % ("is_plus_one", is_plus_one)
+                hdr += "</code>\r\n"
+                res.append([is_plus_one, hdr + content])
             except Exception as e:
                 print(e, datetime.datetime.now())
                 traceback.print_exc()

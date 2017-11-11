@@ -116,6 +116,24 @@ class dataBase:
         self.lock.release()
         return res
 
+    def getCids(self):
+        sql = "SELECT `cid` FROM `users`"
+        self.lock.acquire()
+        cur = self.conn.cursor()
+        res = []
+        try:
+            cur.execute(sql)
+            for row in cur:
+                res.append(row[0])
+        except Exception as e:
+            print(e, datetime.datetime.now())
+            traceback.print_exc()
+            res = None
+        self.conn.commit()
+        cur.close()
+        self.lock.release()
+        return res
+
     def getTopicsByCid(self, cid):
         sql = "SELECT topic FROM `topics` WHERE cid=%s"
         self.lock.acquire()
