@@ -9,17 +9,22 @@ import threading
 from database import dataBase
 from newsreader import newsReader
 
+
 class cowBot(threading.Thread):
     def __init__(self, conf, q):
         threading.Thread.__init__(self)
         self.token = conf['bot']['token']
         self.conf = conf
         self.q = q
-        self.rdr = newsReader(conf['news']['host'], conf['news']['port'], conf['news']['user'], conf['news']['pass'], conf['news']['last'])
-        self.db = dataBase(conf['db']['host'], conf['db']['user'], conf['db']['pass'], conf['db']['name'], self.rdr)
+        self.rdr = newsReader(conf['news']['host'], conf['news']['port'],
+                              conf['news']['user'], conf['news']['pass'],
+                              conf['news']['last'])
+        self.db = dataBase(conf['db']['host'], conf['db']['user'],
+                           conf['db']['pass'], conf['db']['name'], self.rdr)
 
         self.url = 'https://api.telegram.org/bot%s/' % self.token
-        self.setWebhook(conf['bot']['url']+'%s' % self.token, conf['web']['pubkey'])
+        self.setWebhook(conf['bot']['url'] + '%s' % self.token,
+                        conf['web']['pubkey'])
         self.registerHandlers()
         self.registerTexts()
 
@@ -31,9 +36,10 @@ class cowBot(threading.Thread):
                 for entry in entries:
                     topic = entry[0]
                     res = self.rdr.updateTopic(topic)
-                    for cid in entry[1]:
+                    for user in entry[1]:
                         for msg in res:
-                            self.sendMsg(cid, msg)
+                            if not user[1] or not msg[0]:
+                                self.sendMsg(user[0], msg[1])
             except Exception as e:
                 print(e, datetime.datetime.now())
                 traceback.print_exc()
@@ -43,20 +49,35 @@ class cowBot(threading.Thread):
         self.db.ping()
         res = self.db.registerUser(data['uid'], data['cid'], data['uname'])
         msg = self.texts['error'].format(data['uname'])
-        if res==0:
+        if res == 0:
             msg = self.texts['welcome'].format(data['uname'])
-        elif res==1:
+        elif res == 1:
             msg = self.texts['registered'].format(data['uname'])
 
         if reply:
             self.sendMsg(data['cid'], msg)
+
+    def handlePlusOne(self, data, no_plus_one, reply=True):
+        self.db.ping()
+        res = self.db.updateUser(data['uid'], no_plus_one)
+        msg = self.texts['error'].format(data['uname'])
+        if res == 0:
+            msg = self.texts['updated'].format(data['uname'])
+        if reply:
+            self.sendMsg(data['cid'], msg)
+
+    def noPlusOne(self, data, reply=True):
+        self.handlePlusOne(data, True, reply)
+
+    def yesPlusOne(self, data, reply=True):
+        self.handlePlusOne(data, False, reply)
 
     def helpHandler(self, data):
         self.sendMsg(data['cid'], self.texts['help'])
 
     def addHandler(self, data):
         text = data['txt'].split(' ')
-        if len(text)<2:
+        if len(text) < 2:
             self.sendMsg(data['cid'], self.texts['invalid'])
             return
 
@@ -67,16 +88,16 @@ class cowBot(threading.Thread):
         msg = self.texts['error'].format(data['uname'])
         if res == 0:
             msg = self.texts['added'].format(topic)
-        elif res==1:
+        elif res == 1:
             msg = self.texts['exists'].format(topic)
-        elif res==2:
+        elif res == 2:
             msg = self.texts['notfound'].format(topic)
 
         self.sendMsg(data['cid'], msg)
 
     def deleteHandler(self, data):
         text = data['txt'].split(' ')
-        if len(text)<2:
+        if len(text) < 2:
             self.sendMsg(data['cid'], self.texts['invalid'])
             return
 
@@ -87,9 +108,9 @@ class cowBot(threading.Thread):
         msg = self.texts['error'].format(data['uname'])
         if res == 0:
             msg = self.texts['deleted'].format(topic)
-        elif res==1:
+        elif res == 1:
             msg = self.texts['notexists'].format(topic)
-        elif res==2:
+        elif res == 2:
             msg = self.texts['notfound'].format(topic)
 
         self.sendMsg(data['cid'], msg)
@@ -102,8 +123,8 @@ class cowBot(threading.Thread):
         else:
             msg = ""
             for topic in res:
-                msg += topic+"\r\n"
-            if msg=="":
+                msg += topic + "\r\n"
+            if msg == "":
                 msg = "You haven't added any topics yet"
 
         self.sendMsg(data['cid'], msg)
@@ -123,7 +144,7 @@ class cowBot(threading.Thread):
             r = requests.post(self.url, json=data)
             print("Request:", data)
             res = r.json()
-            if res["ok"]!=True:
+            if res["ok"] != True:
                 print(data, res)
             return res["ok"] == True
         except Exception as e:
@@ -147,28 +168,40 @@ class cowBot(threading.Thread):
 
     def registerTexts(self):
         self.texts = {}
-        self.texts['welcome'] = """Hello {}, you can use /help to get a look at commands"""
+        self.texts[
+            'welcome'] = """Hello {}, you can use /help to get a look at commands"""
         self.texts['invalid'] = """You forgot to mention the topic name"""
-        self.texts['registered'] = """Welcome back {}, type /help to take a look at commands"""
+        self.texts[
+            'registered'] = """Welcome back {}, type /help to take a look at commands"""
         self.texts['exists'] = """{} is already in your list"""
         self.texts['notexists'] = """{} does not seem to be in your list"""
         self.texts['notfound'] = """{} does not seem to be a valid topic"""
         self.texts['added'] = """{} has been successfully added to your list"""
-        self.texts['deleted'] = """{} has been successfully deleted from your list"""
-        self.texts['error'] = """Sorry {}, something went wrong, please try again"""
-        self.texts['help'] = """You can add courses by "/add metu.ceng.course.100"
+        self.texts[
+            'deleted'] = """{} has been successfully deleted from your list"""
+        self.texts[
+            'error'] = """Sorry {}, something went wrong, please try again"""
+        self.texts[
+            'updated'] = """Well played! Your profile successfully updated, {}."""
+        self.texts[
+            'help'] = """You can add courses by "/add metu.ceng.course.100"
 or any other topic, by any suffix. Then you can use "/list" to list the added topics
-or use "/delete metu.ceng.course.100" to delete any course from your list"""
+or use "/delete metu.ceng.course.100" to delete any course from your list. There is also +1 flagging
+you can enable it using /noplus1 this feature is experimental. For any bugs and hugs @kadircet."""
 
     def registerHandlers(self):
         self.handlers = {
-                'add': self.addHandler,
-                'list': self.listHandler,
-                'start': self.startHandler,
-                'delete': self.deleteHandler,
-                'help': self.helpHandler,
-                'listall': self.listAll
-                }
+            'add': self.addHandler,
+            'list': self.listHandler,
+            'start': self.startHandler,
+            'delete': self.deleteHandler,
+            'help': self.helpHandler,
+            'listall': self.listAll,
+            'no+1': self.noPlusOne,
+            'yes+1': self.yesPlusOne,
+            'noplus1': self.noPlusOne,
+            'yesplus1': self.yesPlusOne
+        }
 
     def sendMsg(self, cid, text):
         data = {}
@@ -177,8 +210,8 @@ or use "/delete metu.ceng.course.100" to delete any course from your list"""
         data['parse_mode'] = 'HTML'
         while len(text):
             data['text'] = text[:4096]
-            text=text[4096:]
-            res=self.makeRequest(data)
+            text = text[4096:]
+            res = self.makeRequest(data)
             if not res:
                 break
         return res
@@ -206,8 +239,8 @@ or use "/delete metu.ceng.course.100" to delete any course from your list"""
             fname = frm['first_name']
         if 'last_name' in frm:
             lname = frm['last_name']
-        if len(uname)==0:
-            uname = fname+' '+lname
+        if len(uname) == 0:
+            uname = fname + ' ' + lname
 
         res['msg'] = msg
         res['cht'] = cht
@@ -224,7 +257,7 @@ or use "/delete metu.ceng.course.100" to delete any course from your list"""
         cid = data['cid']
         cmd = data['cmd']
 
-        if cmd[0]!='/':
+        if cmd[0] != '/':
             self.sendMsg(cid, "Master didn't make me a chatty bot!")
             return
         cmd = cmd[1:]
@@ -232,9 +265,9 @@ or use "/delete metu.ceng.course.100" to delete any course from your list"""
         if cmd not in self.handlers:
             self.sendMsg(cid, "Master didn't implement it yet!")
             return
-        
-        if cmd!='start':
-            self.handlers['start'](data,False)
+
+        if cmd != 'start':
+            self.handlers['start'](data, False)
         self.handlers[cmd](data)
 
     def run(self):
@@ -248,4 +281,3 @@ or use "/delete metu.ceng.course.100" to delete any course from your list"""
                 traceback.print_exc()
             sys.stdout.flush()
             sys.stderr.flush()
-

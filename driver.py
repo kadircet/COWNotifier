@@ -6,16 +6,28 @@ import queue
 from bot import cowBot
 from server import webHook
 
+
 def getConf(storage):
     if os.path.exists(storage):
-        return json.loads(open(storage,'r').read())
+        return json.loads(open(storage, 'r').read())
     conf = {}
-    conf['bot'] = {'token':'BOTTOKEN', 'url':'https://example.com:8443/'}
-    conf['web'] = {'cert':'CERTFILE', 'pubkey':'PUBKEYFILE'}
-    conf['news'] = {'host':'HOST', 'port':2050, 'user':'UNAME', 'pass':'PASS'}
-    conf['db'] = {'host':'HOST', 'user':'USER', 'pass':'PASS', 'name':'DBNAME'}
-    open(storage,'w').write(json.dumps(conf))
+    conf['bot'] = {'token': 'BOTTOKEN', 'url': 'https://example.com:8443/'}
+    conf['web'] = {'cert': 'CERTFILE', 'pubkey': 'PUBKEYFILE'}
+    conf['news'] = {
+        'host': 'HOST',
+        'port': 2050,
+        'user': 'UNAME',
+        'pass': 'PASS'
+    }
+    conf['db'] = {
+        'host': 'HOST',
+        'user': 'USER',
+        'pass': 'PASS',
+        'name': 'DBNAME'
+    }
+    open(storage, 'w').write(json.dumps(conf))
     return conf
+
 
 def main():
     try:
@@ -30,5 +42,6 @@ def main():
         print(e, datetime.datetime.now())
         traceback.print_exc()
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()
