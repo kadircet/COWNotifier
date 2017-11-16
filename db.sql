@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 	uid int not null unique,
 	cid int not null unique,
 	uname varchar(255) not null,
+        no_plus_one BIT not null default 0,
 	primary key(id)
 );
 
