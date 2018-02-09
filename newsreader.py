@@ -124,10 +124,6 @@ class newsReader:
                 traceback.print_exc()
             start += 1
         self.groups[topic] = last
-<<<<<<< HEAD
-        open(self.lfile, 'w').write(json.dumps(self.groups))
-=======
         with open(self.lfile, 'w') as f:
             json.dump(self.groups, f)
->>>>>>> Modify JSON file operations
         return res
