@@ -28,15 +28,25 @@ class webHook(threading.Thread):
             self.do_GET()
 
     class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
-        """MixIn for HTTPServer for threading."""
+        def get_request(self):
+            newsock, addr = self.socket.accept()
+            newsock = ssl.wrap_socket(
+                newsock,
+                certfile=self.certfile,
+                do_handshake_on_connect=False,
+                server_side=True)
+            timeout = newsock.gettimeout()
+            newsock.settimeout(2.)
+            newsock.do_handshake()
+            newsock.settimeout(timeout)
+            return newsock, addr
 
     def __init__(self, conf, q):
         threading.Thread.__init__(self)
         self.ReqHandler.token = conf['bot']['token']
         self.ReqHandler.q = q
         httpd = self.ThreadedHTTPServer(('0.0.0.0', 8443), self.ReqHandler)
-        httpd.socket = ssl.wrap_socket(
-            httpd.socket, certfile=conf['web']['cert'], server_side=True)
+        httpd.certfile = conf['web']['cert']
         self.httpd = httpd
 
     def run(self):
