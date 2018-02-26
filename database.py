@@ -17,13 +17,24 @@ class dataBase:
     def ping(self):
         try:
             self.conn.ping()
-        except:
-            self.conn = MySQLdb.connect(
-                self.params[0],
-                self.params[1],
-                self.params[2],
-                self.params[3],
-                charset='utf8')
+            return
+        except Exception as e:
+            print(e, datetime.datetime.now())
+            traceback.print_exc()
+        backoff = 1
+        while True:
+            try:
+                self.conn = MySQLdb.connect(
+                    self.params[0],
+                    self.params[1],
+                    self.params[2],
+                    self.params[3],
+                    charset='utf8')
+            except Exception as e:
+                print(e, datetime.datetime.now())
+                traceback.print_exc()
+                time.sleep(backoff)
+                backoff = min(60, backoff * 2)
 
     def registerUser(self, uid, cid, uname):
         sql = "INSERT INTO `users` (uid, cid, uname) VALUES (%s,%s,%s)"
@@ -154,7 +165,7 @@ class dataBase:
 
     def getTopics(self):
         sql = "SELECT topic FROM `topics` GROUP BY topic"
-        sql2 = "SELECT `users`.`cid`, no_plus_one FROM `topics`, `users` WHERE topic=%s and `topics`.`cid`=`users`.`cid`"
+        sql2 = "SELECT `users`.`cid`, `users`.`no_plus_one` FROM `topics`, `users` WHERE topic=%s and `topics`.`cid`=`users`.`cid`"
         self.lock.acquire()
         cur = self.conn.cursor()
         cur2 = self.conn.cursor()
