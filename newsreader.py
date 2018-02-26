@@ -37,7 +37,6 @@ class newsReader:
         for g in res:
             if g.group in last:
                 self.groups[g.group] = last[g.group]
-                print(g.group, last[g.group])
             else:
                 self.groups[g.group] = int(g.last)
         with open(self.lfile, 'w') as f:
@@ -49,22 +48,18 @@ class newsReader:
         except Exception as e:
             print(e, datetime.datetime.now())
             traceback.print_exc()
+        backoff = 1
         while True:
-            backoff = 1
             try:
                 self.conn = NNTP_SSL(self.conparams[0], self.conparams[1],
                                      self.conparams[2], self.conparams[3])
                 self.time = time.time()
                 break
-            except TimeoutError as e:
+            except Exception as e:
                 time.sleep(backoff)
                 backoff = min(60, backoff * 2)
                 print(e, datetime.datetime.now())
                 traceback.print_exc()
-            except Exception as e:
-                print(e, datetime.datetime.now())
-                traceback.print_exc()
-                break
 
     def close(self):
         self.conn.quit()
