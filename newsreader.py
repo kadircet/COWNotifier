@@ -19,7 +19,6 @@ class newsReader:
         self.conparams = [host, port, uname, pw]
         self.lfile = lfile
         self.initialized = False
-        #        threading.Thread(target=self.initConnection).start()
         self.initConnection()
 
     def initConnection(self):
@@ -41,14 +40,8 @@ class newsReader:
                 print(g.group, last[g.group])
             else:
                 self.groups[g.group] = int(g.last)
-<<<<<<< HEAD
-        open(self.lfile, 'w').write(json.dumps(self.groups))
-        self.initialized = True
-        print("INITIALIZED")
-=======
         with open(self.lfile, 'w') as f:
             json.dump(self.groups, f)
->>>>>>> Modify JSON file operations
 
     def connect(self):
         try:
