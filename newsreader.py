@@ -41,6 +41,7 @@ class newsReader:
                 self.groups[g.group] = int(g.last)
         with open(self.lfile, 'w') as f:
             json.dump(self.groups, f)
+        self.initialized = True
 
     def connect(self):
         try:
