@@ -204,3 +204,37 @@ class dataBase:
         cur.close()
         self.lock.release()
         return res
+
+    def addAlias(self, cid, alias):
+        sql = "INSERT INTO `aliases` (`cid`, `alias`) VALUES (%s, %s)"
+        self.lock.acquire()
+        cur = self.conn.cursor()
+        res = 0
+        try:
+            cur.execute(sql, (cid, alias))
+        except MySQLdb.IntegrityError:
+            res = 1
+        except Exception as e:
+            print(e, datetime.datetime.now())
+            traceback.print_exc()
+            res = 2
+        self.conn.commit()
+        cur.close()
+        self.lock.release()
+        return res
+
+    def getAliases(self, cid):
+        sql = "SELECT `alias` FROM `aliases` WHERE `cid` = %s"
+        self.lock.acquire()
+        cur = self.conn.cursor()
+        res = []
+        try:
+            cur.execute(sql, (cid, ))
+            for row in cur:
+                res.append(row[0])
+        except Exception as e:
+            print(e, datetime.datetime.now())
+            traceback.print_exc()
+        cur.close()
+        self.lock.release()
+        return res
