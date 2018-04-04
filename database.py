@@ -187,3 +187,20 @@ class dataBase:
         cur.close()
         self.lock.release()
         return res
+
+    def checkForAlias(self, alias):
+        sql = "SELECT `cid` FROM `aliases` WHERE `alias` = %s"
+        self.lock.acquire()
+        cur = self.conn.cursor()
+        res = []
+        try:
+            cur.execute(sql, (alias, ))
+            for row in cur:
+                res.append(row[0])
+        except Exception as e:
+            print(e, datetime.datetime.now())
+            traceback.print_exc()
+            res = None
+        cur.close()
+        self.lock.release()
+        return res
