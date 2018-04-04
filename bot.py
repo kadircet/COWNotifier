@@ -229,13 +229,21 @@ class cowBot(threading.Thread):
             'updated'] = """Well played! Your profile successfully updated, {}."""
         self.texts[
             'help'] = """/add NEWSGROUP_SUFFIX - Adds first group matching the suffix to watchlist.
+
 /list - Lists groups in the watchlist.
+
 /delete NEWSGROUP - Deletes given group from watchlist.
+
 /help - Shows that list.
+
 /listall - Lists all possible groups to watch.
+
 /noplus1 - Enables +1 filtering.<b>Experimental</b>.
+
 /yesplus1 - Disables +1 filtering.
+
 /addalias STUDENT_NO - Adds given student number to aliases to receive mention notifications. STUDENT_NO must be in the form e?\d{6,7}.<b>Experimental</b>.
+
 /showaliases - Lists all registered aliases.
 
 For any bugs and hugs reach out to @kadircet
