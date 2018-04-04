@@ -160,7 +160,7 @@ class cowBot(threading.Thread):
             return
 
         alias = text[1]
-        if self.mention_manager.isStudentNumber(alias) == False:
+        if self.mention_manager.isStudentNumber(alias) == None:
             msg = self.texts['aliasnotvalid'].format(alias)
         else:
             self.db.ping()
