@@ -21,5 +21,6 @@ CREATE TABLE IF NOT EXISTS `aliases` (
   `cid` int not null,
   `alias` varchar(255) not null,
   foreign key(`cid`) references users(`cid`),
-  primary key(`id`)
+  primary key(`id`),
+  unique `ident` (`cid`, `alias`)
 );
