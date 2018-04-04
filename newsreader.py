@@ -74,7 +74,7 @@ class newsReader:
                 return t
         return None
 
-    def updateTopic(self, topic):
+    def updateTopic(self, topic, mention_manager):
         if not self.initialized:
             return []
         if time.time() - self.time > 60.:
@@ -105,6 +105,7 @@ class newsReader:
                     if part.get_content_type() == 'text/plain':
                         content += html.escape(part.get_content())
                 is_plus_one = isPlusOne(content)
+                mention_manager.parseMentions(content, topic)
                 hdr += "%s: %s\r\n" % ("is_plus_one", is_plus_one)
                 hdr += "</code>\r\n"
                 res.append([is_plus_one, hdr + content])

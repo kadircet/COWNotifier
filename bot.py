@@ -6,6 +6,7 @@ import time
 import threading
 from database import dataBase
 from newsreader import newsReader
+from mention_manager import mentionManager
 
 
 class cowBot(threading.Thread):
@@ -19,6 +20,7 @@ class cowBot(threading.Thread):
                               conf['news']['last'])
         self.db = dataBase(conf['db']['host'], conf['db']['user'],
                            conf['db']['pass'], conf['db']['name'], self.rdr)
+        self.mention_manager = mentionManager(self.db, self)
 
         self.url = 'https://api.telegram.org/bot%s/' % self.token
         self.setWebhook(conf['bot']['url'] + '%s' % self.token,
@@ -33,7 +35,7 @@ class cowBot(threading.Thread):
                 entries = self.db.getTopics()
                 for entry in entries:
                     topic = entry[0]
-                    res = self.rdr.updateTopic(topic)
+                    res = self.rdr.updateTopic(topic, self.mention_manager)
                     for user in entry[1]:
                         for msg in res:
                             if not user[1] or not msg[0]:
