@@ -152,6 +152,37 @@ class cowBot(threading.Thread):
 
         self.sendMsg(data['cid'], msg)
 
+    def addAliasHandler(self, data):
+        cid = data['cid']
+        text = data['txt'].split(' ')
+        if len(text) < 2:
+            self.sendMsg(cid, self.texts['noalias'])
+            return
+
+        alias = text[1]
+        if self.mention_manager.isStudentNumber(alias) == False:
+            msg = self.texts['aliasnotvalid'].format(alias)
+        else:
+            self.db.ping()
+            res = self.db.addAlias(cid, alias)
+            msg = self.texts['error'].format(data['uname'])
+            if res == 0:
+                msg = self.texts['aliasadded'].format(alias)
+            elif res == 1:
+                msg = self.texts['aliasexists'].format(alias)
+
+        self.sendMsg(cid, msg)
+
+    def showAliasesHandler(self, data):
+        cid = data['cid']
+
+        self.db.ping()
+        aliases = self.db.getAliases(cid)
+        msg = "\r\n".join(aliases)
+        if len(aliases) == 0:
+            msg = "You haven't added any aliases yet."
+        self.sendMsg(cid, msg)
+
     def makeRequest(self, data):
         try:
             r = requests.post(self.url, json=data)
@@ -197,10 +228,26 @@ class cowBot(threading.Thread):
         self.texts[
             'updated'] = """Well played! Your profile successfully updated, {}."""
         self.texts[
-            'help'] = """You can add courses by "/add metu.ceng.course.100"
-or any other topic, by any suffix. Then you can use "/list" to list the added topics
-or use "/delete metu.ceng.course.100" to delete any course from your list. There is also +1 flagging
-you can enable it using /noplus1 this feature is experimental. For any bugs and hugs @kadircet."""
+            'help'] = """/add NEWSGROUP_SUFFIX - Adds first group matching the suffix to watchlist.
+/list - Lists groups in the watchlist.
+/delete NEWSGROUP - Deletes given group from watchlist.
+/help - Shows that list.
+/listall - Lists all possible groups to watch.
+/noplus1 - Enables +1 filtering.<b>Experimental</b>.
+/yesplus1 - Disables +1 filtering.
+/addalias STUDENT_NO - Adds given student number to aliases to receive mention notifications. STUDENT_NO must be in the form e?\d{6,7}.<b>Experimental</b>.
+/showaliases - Lists all registered aliases.
+
+For any bugs and hugs reach out to @kadircet
+Source is available at https://github.com/kadircet/COWNotifier
+"""
+        self.texts[
+            'aliasadded'] = """Alias {}, has been succesfully added to your mention list."""
+        self.texts[
+            'aliasnotvalid'] = """Alias must be METU student number, complying with regex e?\d{{6,7}}, {} doesn't comply with it."""
+        self.texts[
+            'aliasexists'] = """You already have {} as one of your aliases."""
+        self.texts['noalias'] = """You forgot to provide an alias."""
 
     def registerHandlers(self):
         self.handlers = {
@@ -214,7 +261,9 @@ you can enable it using /noplus1 this feature is experimental. For any bugs and 
             'yes+1': self.yesPlusOne,
             'noplus1': self.noPlusOne,
             'yesplus1': self.yesPlusOne,
-            'announcement': self.announcementHandler
+            'announcement': self.announcementHandler,
+            'addalias': self.addAliasHandler,
+            'showaliases': self.showAliasesHandler
         }
 
     def sendMsg(self, cid, text):
