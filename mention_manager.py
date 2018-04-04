@@ -4,10 +4,11 @@ import html
 
 class mentionManager:
     def isStudentNumber(self, msg):
-        return self.student_no_matcher.match(msg) != None
+        search = self.student_no_matcher.search(msg)
+        return search if search is None else search.group()
 
     def __init__(self, db, cow_bot):
-        self.student_no_matcher = re.compile("^e?\d{6,7}$")
+        self.student_no_matcher = re.compile("e?\d{6,7}")
         self.db = db
         self.cow_bot = cow_bot
         self.mention_text = "Your alias <b>{}</b> has been mentioned in " + \
@@ -25,12 +26,19 @@ class mentionManager:
         line_no = 0
         for raw_line in content.split('\n'):
             line = raw_line.strip()
-            if self.isStudentNumber(line):
-                cids = self.db.checkForAlias(line)
-                if cids != None:
-                    for cid in cids:
-                        self.sendMention(cid, line, newsgroup, current_header,
-                                         line_no)
+            if line.startswith('&gt'):
+                continue
+            student_no = self.isStudentNumber(line)
+            if student_no != None:
+                cids = self.db.checkForAlias(student_no)
+                if cids == None:
+                    continue
+                header = current_header
+                if len(line) > len(student_no):
+                    header = line
+                for cid in cids:
+                    self.sendMention(cid, student_no, newsgroup, header,
+                                     line_no)
             else:
                 current_header = line
                 line_no = 0
