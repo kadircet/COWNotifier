@@ -164,6 +164,7 @@ class cowBot(threading.Thread):
             msg = self.texts['aliasnotvalid'].format(alias)
         else:
             self.db.ping()
+            alias = self.mention_manager.getMinimalStudentNo(alias)
             res = self.db.addAlias(cid, alias)
             msg = self.texts['error'].format(data['uname'])
             if res == 0:

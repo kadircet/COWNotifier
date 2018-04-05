@@ -21,6 +21,13 @@ class mentionManager:
                                         html.escape(newsgroup),
                                         html.escape(header), line_no))
 
+    def getMinimalStudentNo(self, student_no):
+        base = student_no
+        if base[0] == 'e':
+            base = base[1:]
+        base = base[:6]
+        return base
+
     def parseMentions(self, content, newsgroup):
         current_header = ""
         line_no = 0
@@ -30,7 +37,8 @@ class mentionManager:
                 continue
             student_no = self.isStudentNumber(line)
             if student_no != None:
-                cids = self.db.checkForAlias(student_no)
+                cids = self.db.checkForAlias(
+                    self.getMinimalStudentNo(student_no))
                 if cids == None:
                     continue
                 header = current_header
