@@ -83,13 +83,13 @@ class cowBot(threading.Thread):
 
         topic = text[1]
         self.db.ping()
-        res = self.db.addTopic(data['cid'], topic)
+        res, added_topic = self.db.addTopic(data['cid'], topic)
 
         msg = self.texts['error'].format(data['uname'])
         if res == 0:
-            msg = self.texts['added'].format(topic)
+            msg = self.texts['added'].format(added_topic)
         elif res == 1:
-            msg = self.texts['exists'].format(topic)
+            msg = self.texts['exists'].format(added_topic)
         elif res == 2:
             msg = self.texts['notfound'].format(topic)
 
@@ -116,13 +116,13 @@ class cowBot(threading.Thread):
 
         topic = text[1]
         self.db.ping()
-        res = self.db.deleteTopic(data['cid'], topic)
+        res, deleted_topic = self.db.deleteTopic(data['cid'], topic)
 
         msg = self.texts['error'].format(data['uname'])
         if res == 0:
-            msg = self.texts['deleted'].format(topic)
+            msg = self.texts['deleted'].format(deleted_topic)
         elif res == 1:
-            msg = self.texts['notexists'].format(topic)
+            msg = self.texts['notexists'].format(deleted_topic)
         elif res == 2:
             msg = self.texts['notfound'].format(topic)
 

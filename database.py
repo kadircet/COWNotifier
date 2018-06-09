@@ -81,7 +81,7 @@ class dataBase:
         if not self.rdr.validTopic(topic):
             topic = self.rdr.closest(topic)
             if topic == None:
-                return 2
+                return (2, topic)
         sql = "INSERT INTO `topics` (cid, topic) VALUES (%s, %s)"
         self.lock.acquire()
         cur = self.conn.cursor()
@@ -100,13 +100,13 @@ class dataBase:
         self.conn.commit()
         cur.close()
         self.lock.release()
-        return res
+        return (res, topic)
 
     def deleteTopic(self, cid, topic):
         if not self.rdr.validTopic(topic):
             topic = self.rdr.closest(topic)
             if topic == None:
-                return 2
+                return (2, topic)
         sql = "DELETE FROM `topics` WHERE cid=%s AND topic=%s"
         self.lock.acquire()
         cur = self.conn.cursor()
@@ -125,7 +125,7 @@ class dataBase:
         self.conn.commit()
         cur.close()
         self.lock.release()
-        return res
+        return (res, topic)
 
     def getCids(self):
         sql = "SELECT `cid` FROM `users`"
