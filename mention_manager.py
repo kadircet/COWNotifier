@@ -36,10 +36,10 @@ class mentionManager:
             if line.startswith('&gt'):
                 continue
             student_no = self.isStudentNumber(line)
-            if student_no != None:
+            if student_no is not None:
                 cids = self.db.checkForAlias(
                     self.getMinimalStudentNo(student_no))
-                if cids == None:
+                if cids is None:
                     continue
                 header = current_header
                 if len(line) > len(student_no):

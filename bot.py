@@ -131,7 +131,7 @@ class cowBot(threading.Thread):
     def listHandler(self, data):
         self.db.ping()
         res = self.db.getTopicsByCid(data['cid'])
-        if res == None:
+        if res is None:
             msg = self.texts['error'].format(data['uname'])
         else:
             msg = ""
@@ -145,7 +145,7 @@ class cowBot(threading.Thread):
     def listAll(self, data):
         self.db.ping()
         res = self.db.getTopicsByCid(data['cid'])
-        if res == None:
+        if res is None:
             msg = self.texts['error'].format(data['uname'])
         else:
             msg = "\n".join(self.rdr.groups.keys())
@@ -160,7 +160,7 @@ class cowBot(threading.Thread):
             return
 
         alias = text[1]
-        if self.mention_manager.isStudentNumber(alias) == None:
+        if self.mention_manager.isStudentNumber(alias) is None:
             msg = self.texts['aliasnotvalid'].format(alias)
         else:
             self.db.ping()
