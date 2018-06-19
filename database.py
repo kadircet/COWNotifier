@@ -80,7 +80,7 @@ class dataBase:
     def addTopic(self, cid, topic):
         if not self.rdr.validTopic(topic):
             topic = self.rdr.closest(topic)
-            if topic == None:
+            if topic is None:
                 return (2, topic)
         sql = "INSERT INTO `topics` (cid, topic) VALUES (%s, %s)"
         self.lock.acquire()
@@ -105,7 +105,7 @@ class dataBase:
     def deleteTopic(self, cid, topic):
         if not self.rdr.validTopic(topic):
             topic = self.rdr.closest(topic)
-            if topic == None:
+            if topic is None:
                 return (2, topic)
         sql = "DELETE FROM `topics` WHERE cid=%s AND topic=%s"
         self.lock.acquire()
