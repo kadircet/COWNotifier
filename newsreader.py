@@ -5,6 +5,7 @@ import time
 import datetime
 import html
 import json
+from newsparser import newsArticle
 
 
 class newsReader:

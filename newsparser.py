@@ -36,7 +36,6 @@ def tryParseAttachment(part):
         if param == "filename":
             file_name = value
             break
-    print("File size:", len(file_data) / 1024 / 1024, "MB")
     return telegramAttachment(file_name, file_data, content_type)
 
 
@@ -90,7 +89,7 @@ class newsArticle:
                         part.get_content_charset(), 'replace')
             content = html.escape(content)
             self.is_plus_one = isPlusOne(content)
-            #self.mention_manager.parseMentions(content, topic)
+            self.mention_manager.parseMentions(content, topic)
             hdr += "%s: %s\r\n" % ("is_plus_one", self.is_plus_one)
             hdr += "</code>\r\n"
             self.content = hdr + content
