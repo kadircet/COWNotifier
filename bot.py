@@ -51,9 +51,9 @@ class cowBot(threading.Thread):
         msg = self.texts['error'].format(data['uname'])
         if res == 0:
             msg = self.texts['welcome'].format(data['uname'])
-            self.db.setUserStatus(data['cid'], 1)
         elif res == 1:
             msg = self.texts['registered'].format(data['uname'])
+            self.db.setUserStatus(data['cid'], 1)
 
         if reply:
             self.sendMsg(data['cid'], msg)
