@@ -45,9 +45,10 @@ class newsArticle:
     registry.map_to_type('From', UnstructuredHeader)
     policy = EmailPolicy(header_factory=registry)
 
-    def __init__(self, raw_msg, mention_manager):
+    def __init__(self, raw_msg, mention_manager, topic):
         self.raw_msg = raw_msg
         self.mention_manager = mention_manager
+        self.topic = topic
         self.broken = False
         self.content = None
         self.is_plus_one = None
@@ -89,7 +90,7 @@ class newsArticle:
                         part.get_content_charset(), 'replace')
             content = html.escape(content)
             self.is_plus_one = isPlusOne(content)
-            self.mention_manager.parseMentions(content, topic)
+            self.mention_manager.parseMentions(content, self.topic)
             hdr += "%s: %s\r\n" % ("is_plus_one", self.is_plus_one)
             hdr += "</code>\r\n"
             self.content = hdr + content

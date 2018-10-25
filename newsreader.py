@@ -86,7 +86,7 @@ class newsReader:
             try:
                 artic = self.conn.article(start)[1]
                 raw_msg = b'\r\n'.join(artic.lines)
-                res.append(newsArticle(raw_msg, mention_manager))
+                res.append(newsArticle(raw_msg, mention_manager, topic))
             except Exception as e:
                 print(e, datetime.datetime.now())
                 traceback.print_exc()
