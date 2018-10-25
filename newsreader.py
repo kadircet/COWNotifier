@@ -2,16 +2,9 @@ from nntplib import NNTP_SSL
 import traceback
 import threading
 import time
-import email
 import datetime
-from email.policy import EmailPolicy
-from email.headerregistry import HeaderRegistry, UnstructuredHeader
 import html
 import json
-
-
-def isPlusOne(msg):
-    return msg.startswith("+1") and len(msg) < 10
 
 
 class newsReader:
@@ -88,27 +81,11 @@ class newsReader:
             return
         start = max(self.groups[topic] + 1, first)
         res = []
-        headers = ("From", "Newsgroups", "Subject", "Date")
-        registry = HeaderRegistry()
-        registry.map_to_type('From', UnstructuredHeader)
-        policy = EmailPolicy(header_factory=registry)
         while start <= last:
             try:
                 artic = self.conn.article(start)[1]
                 raw_msg = b'\r\n'.join(artic.lines)
-                mime_msg = email.message_from_bytes(raw_msg, policy=policy)
-                hdr = "<code>"
-                for h in headers:
-                    hdr += "%s: %s\r\n" % (h, html.escape(mime_msg[h]))
-                content = ""
-                for part in mime_msg.walk():
-                    if part.get_content_type() == 'text/plain':
-                        content += html.escape(part.get_content())
-                is_plus_one = isPlusOne(content)
-                mention_manager.parseMentions(content, topic)
-                hdr += "%s: %s\r\n" % ("is_plus_one", is_plus_one)
-                hdr += "</code>\r\n"
-                res.append([is_plus_one, hdr + content])
+                res.append(newsArticle(raw_msg, mention_manager))
             except Exception as e:
                 print(e, datetime.datetime.now())
                 traceback.print_exc()

@@ -38,8 +38,8 @@ class cowBot(threading.Thread):
                     res = self.rdr.updateTopic(topic, self.mention_manager)
                     for user in entry[1]:
                         for msg in res:
-                            if not user[1] or not msg[0]:
-                                self.sendMsg(user[0], msg[1])
+                            if not user[1] or not msg.isPlusOne():
+                                self.sendArticle(user[0], msg)
             except Exception as e:
                 print(e, datetime.datetime.now())
                 traceback.print_exc()
@@ -197,6 +197,18 @@ class cowBot(threading.Thread):
             traceback.print_exc()
         return False
 
+    def makeMultiPartRequest(self, files, data):
+        try:
+            r = requests.post(self.url, files=files, data=data)
+            res = r.json()
+            if res["ok"] != True:
+                print(data, res)
+            return res
+        except Exception as e:
+            print(e, datetime.datetime.now())
+            traceback.print_exc()
+        return False
+
     def setWebhook(self, url, pubkey):
         data = {}
 
@@ -275,7 +287,14 @@ Source is available at https://github.com/kadircet/COWNotifier
             'showaliases': self.showAliasesHandler
         }
 
+    def sendArticle(self, cid, article):
+        self.sendMsg(cid, article.getAsHtml())
+        for attachment in article.getAttachments():
+            self.sendAttachment(cid, attachment)
+
     def sendMsg(self, cid, text):
+        if text is None:
+            return
         data = {}
         data['method'] = 'sendMessage'
         data['chat_id'] = cid
@@ -286,7 +305,25 @@ Source is available at https://github.com/kadircet/COWNotifier
             res = self.makeRequest(data)
             if not res:
                 break
-        return res
+        return
+
+    def sendAttachment(self, cid, attachment):
+        data = {}
+        data['method'] = 'sendDocument'
+        data['chat_id'] = cid
+        if attachment.file_id:
+            data['document'] = attachment.file_id
+            self.makeRequest(data)
+        else:
+            files = {
+                'document': (attachment.name, attachment.content,
+                             attachment.type)
+            }
+
+            res = self.makeMultiPartRequest(files, data)
+            if res:
+                attachment.file_id = res['result']['document']['file_id']
+                attachment.content = None
 
     def parse(self, data):
         res = {}
