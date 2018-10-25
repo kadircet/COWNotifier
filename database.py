@@ -58,6 +58,25 @@ class dataBase:
         self.lock.release()
         return res
 
+    def setUserStatus(self, uid, status):
+        sql = "UPDATE `users` SET `is_active`=%s WHERE `uid`=%s"
+        self.lock.acquire()
+        cur = self.conn.cursor()
+        res = 0
+        try:
+            cur.execute(sql, (
+                status,
+                uid,
+            ))
+        except Exception as e:
+            print(e, datetime.datetime.now())
+            traceback.print_exc()
+            res = 1
+        self.conn.commit()
+        cur.close()
+        self.lock.release()
+        return res
+
     def updateUser(self, uid, no_plus_one):
         sql = "UPDATE `users` SET `no_plus_one`=%s WHERE `uid`=%s"
         self.lock.acquire()
@@ -165,7 +184,7 @@ class dataBase:
 
     def getTopics(self):
         sql = "SELECT topic FROM `topics` GROUP BY topic"
-        sql2 = "SELECT `users`.`cid`, `users`.`no_plus_one` FROM `topics`, `users` WHERE topic=%s and `topics`.`cid`=`users`.`cid`"
+        sql2 = "SELECT `users`.`cid`, `users`.`no_plus_one` FROM `topics`, `users` WHERE topic=%s and `topics`.`cid`=`users`.`cid` and `users`.`is_active`=1"
         self.lock.acquire()
         cur = self.conn.cursor()
         cur2 = self.conn.cursor()

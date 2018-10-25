@@ -51,6 +51,7 @@ class cowBot(threading.Thread):
         msg = self.texts['error'].format(data['uname'])
         if res == 0:
             msg = self.texts['welcome'].format(data['uname'])
+            self.db.setUserStatus(data['cid'], 1)
         elif res == 1:
             msg = self.texts['registered'].format(data['uname'])
 
@@ -190,6 +191,10 @@ class cowBot(threading.Thread):
             print("Request:", data)
             res = r.json()
             if res["ok"] != True:
+                if res["error_code"] == 403 and res[
+                        "description"] == "Forbidden: bot was blocked by the user":
+                    self.db.ping()
+                    self.db.setUserStatus(data['chat_id'], 0)
                 print(data, res)
             return res["ok"] == True
         except Exception as e:

@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `cid` int not null unique,
   `uname` varchar(255) not null,
   `no_plus_one` BIT not null default 0,
+  `is_active` BIT not null default 1,
   primary key(`id`)
 );
 
