@@ -85,9 +85,14 @@ class newsArticle:
                 if attachment:
                     self.attachments.append(attachment)
                 elif part.get_content_type() == 'text/plain':
-                    content += str(
-                        part.get_payload(decode=True),
-                        part.get_content_charset(), 'replace')
+                    try:
+                        content += str(
+                            part.get_payload(decode=True),
+                            part.get_content_charset(), 'replace')
+                    except Exception as e:
+                        print(e, datetime.datetime.now())
+                        traceback.print_exc()
+                        content += part.get_content()
             content = html.escape(content)
             self.is_plus_one = isPlusOne(content)
             self.mention_manager.parseMentions(content, self.topic)
