@@ -123,7 +123,7 @@ class dataBase:
 
     def deleteTopic(self, cid, topic):
         if not self.rdr.validTopic(topic):
-            topic = self.rdr.closest(topic)
+            topic = self.rdr.closest(topic, self.getTopicsByCid(cid))
             if topic is None:
                 return (2, topic)
         sql = "DELETE FROM `topics` WHERE cid=%s AND topic=%s"

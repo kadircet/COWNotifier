@@ -62,8 +62,10 @@ class newsReader:
     def validTopic(self, topic):
         return topic in self.groups
 
-    def closest(self, topic):
-        for t in self.groups:
+    def closest(self, topic, topics=None):
+        if topics is None:
+            topics = self.groups
+        for t in topics:
             if t.endswith(topic):
                 return t
         return None
