@@ -90,8 +90,6 @@ class newsArticle:
                             part.get_payload(decode=True),
                             part.get_content_charset(), 'replace')
                     except Exception as e:
-                        print(e, datetime.datetime.now())
-                        traceback.print_exc()
                         content += part.get_content()
             content = html.escape(content)
             self.is_plus_one = isPlusOne(content)
