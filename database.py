@@ -6,7 +6,7 @@ import datetime
 
 class dataBase:
     def __init__(self, host, uname, pw, dbname, rdr):
-        self.conn = MySQLdb.connect(host, uname, pw, dbname, charset='utf8')
+        self.conn = MySQLdb.connect(host, uname, pw, dbname, charset='utf8mb4')
         self.params = [host, uname, pw, dbname]
         self.rdr = rdr
         self.lock = threading.Lock()
