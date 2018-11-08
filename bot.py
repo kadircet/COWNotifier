@@ -191,8 +191,9 @@ class cowBot(threading.Thread):
             print("Request:", data)
             res = r.json()
             if res["ok"] != True:
-                if res["error_code"] == 403 and res[
-                        "description"] == "Forbidden: bot was blocked by the user":
+                if res["error_code"] == 403 and res["description"] in (
+                        "Forbidden: bot was blocked by the user",
+                        "Forbidden: user is deactivated"):
                     self.db.ping()
                     self.db.setUserStatus(data['chat_id'], 0)
                 print(data, res)
