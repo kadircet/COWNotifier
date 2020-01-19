@@ -9,8 +9,8 @@ from newsparser import newsArticle
 
 
 class newsReader:
-    def __init__(self, host, auth, port, uname, pw, lfile):
-        self.conparams = [host, auth, port, uname, pw]
+    def __init__(self, host, port, uname, pw, lfile, auth):
+        self.conparams = [host, port, uname, pw, auth]
         self.lfile = lfile
         self.initialized = False
         self.initConnection()
@@ -43,10 +43,10 @@ class newsReader:
 
     def updateAuthToken(self):
         self.token = None
-        data={"username":self.conparams[3], "password":self.conparams[4]}
+        data={"username":self.conparams[2], "password":self.conparams[3]}
         backoff = 1
         while True:
-            resp = requests.post(self.conparams[1], data=data, allow_redirects=False)
+            resp = requests.post(self.conparams[4], data=data, allow_redirects=False)
             if resp.ok:
                 for cookie in resp.headers['Set-Cookie'].split(";"):
                     cookie = cookie.strip()

@@ -15,9 +15,9 @@ class cowBot(threading.Thread):
         self.token = conf['bot']['token']
         self.conf = conf
         self.q = q
-        self.rdr = newsReader(conf['news']['host'], conf['news']['auth'],
-                              conf['news']['port'], conf['news']['user'],
-                              conf['news']['pass'], conf['news']['last'])
+        self.rdr = newsReader(conf['news']['host'], conf['news']['port'],
+                              conf['news']['user'], conf['news']['pass'],
+                              conf['news']['last'], conf['news']['auth'])
         self.db = dataBase(conf['db']['host'], conf['db']['user'],
                            conf['db']['pass'], conf['db']['name'], self.rdr)
         self.mention_manager = mentionManager(self.db, self)
