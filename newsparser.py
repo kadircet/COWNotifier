@@ -1,54 +1,17 @@
-import email
 import os
-import hashlib
 import datetime
 import traceback
-import html
-from email.policy import EmailPolicy
-from email.headerregistry import HeaderRegistry, UnstructuredHeader
-
-
-class telegramAttachment:
-    def __init__(self, file_name, file_content, file_type):
-        ext = os.path.splitext(file_name)[1].replace('"', '')
-        self.name = hashlib.sha1(file_name.encode('utf-8')).hexdigest() + ext
-        self.content = file_content
-        self.type = file_type
-        self.file_id = None
-
-
-def isPlusOne(msg):
-    return msg.startswith("+1") and len(msg) < 10
-
-
-def tryParseAttachment(part):
-    content_disp = part.get("Content-Disposition", None)
-    if content_disp is None:
-        return None
-    disps = content_disp.strip().split(';')
-    if disps[0].lower() != "attachment":
-        return None
-    file_data = part.get_payload(decode=True)
-    content_type = part.get_content_type()
-    file_name = "whoknows"
-    for config in disps[1:]:
-        param, value = (x.strip() for x in config.split('='))
-        if param == "filename":
-            file_name = value
-            break
-    return telegramAttachment(file_name, file_data, content_type)
-
+import re
 
 class newsArticle:
-    headers = ("From", "Newsgroups", "Subject", "Date")
-    registry = HeaderRegistry()
-    registry.map_to_type('From', UnstructuredHeader)
-    policy = EmailPolicy(header_factory=registry)
-
-    def __init__(self, raw_msg, mention_manager, topic):
-        self.raw_msg = raw_msg
-        self.mention_manager = mention_manager
+    def __init__(self, user, topic, subject, date, raw_msg, raw_html, mention_manager):
+        self.user = user
         self.topic = topic
+        self.subject = subject
+        self.date = date
+        self.raw_msg = raw_msg
+        self.raw_html = raw_html
+        self.mention_manager = mention_manager
         self.broken = False
         self.content = None
         self.is_plus_one = None
@@ -56,7 +19,7 @@ class newsArticle:
 
     def isPlusOne(self):
         if self.is_plus_one is None:
-            self.parseMessage()
+            self.is_plus_one = self.raw_msg.startswith("+1") and len(self.raw_msg) < 10
         return self.is_plus_one
 
     def getAsHtml(self):
@@ -69,33 +32,70 @@ class newsArticle:
             self.parseMessage()
         return self.attachments
 
+    def makeHeader(self):
+        hdr = f"```\r\n"\
+            f"From: {self.user[0]}({self.user[1]})\r\n"\
+            f"Newsgroup: {self.topic}\r\n"\
+            f"Subject: {self.subject}\r\n"\
+            f"Date: {self.date}\r\n"\
+            f"is_plus_one: {self.isPlusOne()}```\n\n"
+        return hdr
+
+    def parseMarkup(self, msg):
+        parsed = msg.split("\n")
+        for i in range(len(parsed)):
+                line = parsed[i]
+                if line.startswith("#"):
+                    line = line.lstrip("# ")
+                    line = "*"+line+"*"
+                elif line.startswith("*"):
+                    line = '\\'+line
+                elif line.startswith(">"):
+                    line = " >_"+line[1:]+"_"
+                parsed[i] = line
+        parsed = "\n".join(parsed)
+        return parsed
+
+    def parseLinks(self, msg):
+        regex = r"!\[([^\]]*)\]\(([^\)]*)\)"
+        img_tag = '<img src=\"'
+        pattern = re.compile(regex)
+        parsed = ""
+        link_counter = 1
+        last_pos = 0
+        for m in pattern.finditer(msg):
+            # Find link name
+            name_start, name_end = m.span(1)
+            link_name = msg[name_start:name_end]
+            if link_name == "":
+                link_name = f"Link {link_counter}"
+
+            # Find first img link in html
+            html_link_start = self.raw_html.find(img_tag)+len(img_tag)
+            html_link_len = self.raw_html[html_link_start:].find('"')
+            html_link = self.raw_html[html_link_start:html_link_start+html_link_len]
+            # Discard used html
+            self.raw_html = self.raw_html[html_link_start+html_link_len:]
+
+            # Replace link in markdown
+            match_start, match_end = m.span()
+            parsed += msg[last_pos:match_start] + f"[{link_name}]({html_link})"
+
+            last_pos = match_end
+            link_counter+=1
+
+        parsed += msg[last_pos:]
+        return parsed
+
     def parseMessage(self):
         if self.broken:
             return
         self.attachments = []
         try:
-            mime_msg = email.message_from_bytes(
-                self.raw_msg, policy=newsArticle.policy)
-            hdr = "<code>"
-            for h in newsArticle.headers:
-                hdr += "%s: %s\r\n" % (h, html.escape(mime_msg[h]))
-            content = ""
-            for part in mime_msg.walk():
-                attachment = tryParseAttachment(part)
-                if attachment:
-                    self.attachments.append(attachment)
-                elif part.get_content_type() == 'text/plain':
-                    try:
-                        content += str(
-                            part.get_payload(decode=True),
-                            part.get_content_charset(), 'replace')
-                    except Exception as e:
-                        content += part.get_content()
-            content = html.escape(content)
-            self.is_plus_one = isPlusOne(content)
+            hdr = self.makeHeader()
+            content = self.parseMarkup(self.raw_msg)
+            content = self.parseLinks(content)
             self.mention_manager.parseMentions(content, self.topic)
-            hdr += "%s: %s\r\n" % ("is_plus_one", self.is_plus_one)
-            hdr += "</code>\r\n"
             self.content = hdr + content
         except Exception as e:
             print(e, datetime.datetime.now())
