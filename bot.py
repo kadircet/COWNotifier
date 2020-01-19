@@ -259,15 +259,15 @@ class cowBot(threading.Thread):
 
 /listall - Lists all possible groups to watch.
 
-/noplus1 - Enables +1 filtering.<b>Experimental</b>.
+/noplus1 - Enables +1 filtering.*Experimental*.
 
 /yesplus1 - Disables +1 filtering.
 
-/addalias STUDENT_NO - Adds given student number to aliases to receive mention notifications. STUDENT_NO must be in the form e?\d{6,7}.<b>Experimental</b>.
+/addalias STUDENT\_NO - Adds given student number to aliases to receive mention notifications. STUDENT\_NO must be in the form e?\d{6,7}.*Experimental*.
 
 /showaliases - Lists all registered aliases.
 
-For any bugs and hugs reach out to @kadircet
+For any bugs and hugs reach out to @kadircet or @hbostann
 Source is available at https://github.com/kadircet/COWNotifier
 """
         self.texts[
@@ -306,7 +306,7 @@ Source is available at https://github.com/kadircet/COWNotifier
         data = {}
         data['method'] = 'sendMessage'
         data['chat_id'] = cid
-        data['parse_mode'] = 'HTML'
+        data['parse_mode'] = 'Markdown'
         while len(text):
             data['text'] = text[:4096]
             text = text[4096:]
