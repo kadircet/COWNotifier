@@ -33,17 +33,19 @@ class cowBot(threading.Thread):
             try:
                 self.db.ping()
                 entries = self.db.getTopics()
+                posts = self.rdr.updatePosts(self.mention_manager)
                 for entry in entries:
-                    topic = entry[0]
-                    res = self.rdr.updateTopic(topic, self.mention_manager)
-                    for user in entry[1]:
-                        for msg in res:
-                            if not user[1] or not msg.isPlusOne():
-                                self.sendArticle(user[0], msg)
+                    cat_id = entry[0]
+                    if cat_id in posts:
+                        relevant_posts = posts[cat_id]
+                        for user in entry[2]:
+                            for msg in relevant_posts:
+                                if not user[1] or not msg.isPlusOne():
+                                    self.sendArticle(user[0], msg)
             except Exception as e:
                 print(e, datetime.datetime.now())
                 traceback.print_exc()
-            time.sleep(1)
+            time.sleep(10)
 
     def startHandler(self, data, reply=True):
         self.db.ping()
@@ -149,7 +151,7 @@ class cowBot(threading.Thread):
         if res is None:
             msg = self.texts['error'].format(data['uname'])
         else:
-            msg = "\n".join(self.rdr.groups.keys())
+            msg = "\n".join(self.rdr.categories.values())
 
         self.sendMsg(data['cid'], msg)
 
