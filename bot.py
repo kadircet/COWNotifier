@@ -36,12 +36,11 @@ class cowBot(threading.Thread):
                 posts = self.rdr.updatePosts(self.mention_manager)
                 for entry in entries:
                     cat_id = entry[0]
-                    if cat_id in posts:
-                        relevant_posts = posts[cat_id]
-                        for user in entry[2]:
-                            for msg in relevant_posts:
-                                if not user[1] or not msg.isPlusOne():
-                                    self.sendArticle(user[0], msg)
+                    relevant_posts = posts.get(cat_id, [])
+                    for user in entry[2]:
+                        for msg in relevant_posts:
+                            if not user[1] or not msg.isPlusOne():
+                                self.sendArticle(user[0], msg)
             except Exception as e:
                 print(e, datetime.datetime.now())
                 traceback.print_exc()
