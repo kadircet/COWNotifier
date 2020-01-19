@@ -15,9 +15,11 @@ def getConf(storage):
     conf['web'] = {'cert': 'CERTFILE', 'pubkey': 'PUBKEYFILE'}
     conf['news'] = {
         'host': 'HOST',
-        'port': 2050,
+        'auth': 'HOST',
+        'port': 443,
         'user': 'UNAME',
-        'pass': 'PASS'
+        'pass': 'PASS',
+        'last': 'lpost_id'
     }
     conf['db'] = {
         'host': 'HOST',

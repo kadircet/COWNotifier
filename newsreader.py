@@ -1,4 +1,3 @@
-from nntplib import NNTP_SSL
 import traceback
 import threading
 import time
@@ -9,16 +8,23 @@ from newsparser import newsArticle
 
 
 class newsReader:
-    def __init__(self, host, port, uname, pw, lfile):
-        self.conparams = [host, port, uname, pw]
+    def __init__(self, host, auth, port, uname, pw, lfile):
+        self.conparams = [host, auth, port, uname, pw]
         self.lfile = lfile
         self.initialized = False
         self.initConnection()
 
     def initConnection(self):
-        self.conn = NNTP_SSL(self.conparams[0], self.conparams[1],
-                             self.conparams[2], self.conparams[3])
+        self.updateAuthToken()
         self.time = time.time()
+
+        # Grab category ids and names
+        self.categories = {}
+        resp = requests.get(self.conparams[0]+"site.json", cookies=self.token)
+        resp_categories = json.loads(resp.text)['categories']
+        for item in resp_categories:
+            self.categories[item['id']] = item['name']
+
         last = {}
         try:
             with open(self.lfile) as f:
@@ -37,27 +43,11 @@ class newsReader:
             json.dump(self.groups, f)
         self.initialized = True
 
-    def connect(self):
-        try:
-            self.conn.quit()
-        except Exception as e:
-            print(e, datetime.datetime.now())
-            traceback.print_exc()
-        backoff = 1
-        while True:
-            try:
-                self.conn = NNTP_SSL(self.conparams[0], self.conparams[1],
-                                     self.conparams[2], self.conparams[3])
-                self.time = time.time()
-                break
-            except Exception as e:
-                time.sleep(backoff)
-                backoff = min(60, backoff * 2)
-                print(e, datetime.datetime.now())
-                traceback.print_exc()
-
-    def close(self):
-        self.conn.quit()
+    def getIdForTopic(self, topic):
+        for cat_id, name in self.categories.items():
+            if name == topic:
+                return cat_id
+        return -1
 
     def validTopic(self, topic):
         return topic in self.groups

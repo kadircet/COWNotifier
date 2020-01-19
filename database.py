@@ -101,13 +101,17 @@ class dataBase:
             topic = self.rdr.closest(topic)
             if topic is None:
                 return (2, topic)
-        sql = "INSERT INTO `topics` (cid, topic) VALUES (%s, %s)"
+        cat_id = self.rdr.getIdForTopic(topic)
+        if cat_id == -1:
+            return (2, topic)
+        sql = "INSERT INTO `topics` (cid, cat_id, topic) VALUES (%s, %s, %s)"
         self.lock.acquire()
         cur = self.conn.cursor()
         res = 0
         try:
             cur.execute(sql, (
                 cid,
+                cat_id,
                 topic,
             ))
         except MySQLdb.IntegrityError:
@@ -126,7 +130,10 @@ class dataBase:
             topic = self.rdr.closest(topic, self.getTopicsByCid(cid))
             if topic is None:
                 return (2, topic)
-        sql = "DELETE FROM `topics` WHERE cid=%s AND topic=%s"
+        cat_id = self.rdr.getIdForTopic(topic)
+        if cat_id == -1:
+            return (2, topic)
+        sql = "DELETE FROM `topics` WHERE cid=%s AND topic=%s AND cat_id=%s"
         self.lock.acquire()
         cur = self.conn.cursor()
         res = 0
@@ -134,6 +141,7 @@ class dataBase:
             cnt = cur.execute(sql, (
                 cid,
                 topic,
+                cat_id,
             ))
             if cnt == 0:
                 res = 1
@@ -183,8 +191,8 @@ class dataBase:
         return res
 
     def getTopics(self):
-        sql = "SELECT topic FROM `topics` GROUP BY topic"
-        sql2 = "SELECT `users`.`cid`, `users`.`no_plus_one` FROM `topics`, `users` WHERE topic=%s and `topics`.`cid`=`users`.`cid` and `users`.`is_active`=1"
+        sql = "SELECT topic, cat_id FROM `topics` GROUP BY topic"
+        sql2 = "SELECT `users`.`cid`, `users`.`no_plus_one` FROM `topics`, `users` WHERE cat_id=%s and `topics`.`cid`=`users`.`cid` and `users`.`is_active`=1"
         self.lock.acquire()
         cur = self.conn.cursor()
         cur2 = self.conn.cursor()
@@ -192,12 +200,12 @@ class dataBase:
         try:
             cur.execute(sql)
             for row in cur:
-                cur2.execute(sql2, (row[0], ))
+                cur2.execute(sql2, (row[1], ))
                 users = []
                 for user in cur2:
                     _user = (user[0], bool(user[1][0]))
                     users.append(_user)
-                res.append([row[0], users])
+                res.append([row[1], row[0], users])
         except Exception as e:
             print(e, datetime.datetime.now())
             traceback.print_exc()
