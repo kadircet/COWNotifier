@@ -3,9 +3,13 @@ import datetime
 import traceback
 import re
 
+def isPlusOne(msg):
+    return msg.startswith("+1") and len(msg) < 10
+
 class newsArticle:
-    def __init__(self, user, topic, subject, date, raw_msg, raw_html, mention_manager):
-        self.user = user
+    def __init__(self, author, topic, subject, date, raw_msg, raw_html, mention_manager):
+        self.author_username = author[0]
+        self.author_displayname = author[1]
         self.topic = topic
         self.subject = subject
         self.date = date
@@ -15,11 +19,11 @@ class newsArticle:
         self.broken = False
         self.content = None
         self.is_plus_one = None
-        self.attachments = None
+
 
     def isPlusOne(self):
         if self.is_plus_one is None:
-            self.is_plus_one = self.raw_msg.startswith("+1") and len(self.raw_msg) < 10
+            self.is_plus_one = isPlusOne(self.raw_msg)
         return self.is_plus_one
 
     def getAsHtml(self):
@@ -27,36 +31,24 @@ class newsArticle:
             self.parseMessage()
         return self.content
 
-    def getAttachments(self):
-        if self.attachments is None:
-            self.parseMessage()
-        return self.attachments
+    # TODO: getAttachemnts:
+    #  Extract the images and files in the message
 
     def makeHeader(self):
         hdr = f"```\r\n"\
-            f"From: {self.user[0]}({self.user[1]})\r\n"\
+            f"From: {self.author_username}({self.author_displayname})\r\n"\
             f"Newsgroup: {self.topic}\r\n"\
             f"Subject: {self.subject}\r\n"\
             f"Date: {self.date}\r\n"\
             f"is_plus_one: {self.isPlusOne()}```\n\n"
         return hdr
 
-    def parseMarkup(self, msg):
-        parsed = msg.split("\n")
-        for i in range(len(parsed)):
-                line = parsed[i]
-                if line.startswith("#"):
-                    line = line.lstrip("# ")
-                    line = "*"+line+"*"
-                elif line.startswith("*"):
-                    line = '\\'+line
-                elif line.startswith(">"):
-                    line = " >_"+line[1:]+"_"
-                parsed[i] = line
-        parsed = "\n".join(parsed)
-        return parsed
-
     def parseLinks(self, msg):
+        # In markdown, discourse uses the following format for images and image links
+        #     ![image_name](upload://<file_name_hash>)
+        # However, in the html version of the message image links are regular http(s)
+        # links. This part of the code removes the upload:// urls from the markdown and
+        # replaces them with the image links from the html version.
         regex = r"!\[([^\]]*)\]\(([^\)]*)\)"
         img_tag = '<img src=\"'
         pattern = re.compile(regex)
@@ -90,10 +82,10 @@ class newsArticle:
     def parseMessage(self):
         if self.broken:
             return
-        self.attachments = []
+
         try:
             hdr = self.makeHeader()
-            content = self.parseMarkup(self.raw_msg)
+            # TODO: Parse Markup
             content = self.parseLinks(content)
             self.mention_manager.parseMentions(content, self.topic)
             self.content = hdr + content
