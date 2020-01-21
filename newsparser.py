@@ -85,6 +85,7 @@ class newsArticle:
 
         try:
             hdr = self.makeHeader()
+            content = self.raw_msg
             # TODO: Parse Markup
             content = self.parseLinks(content)
             self.mention_manager.parseMentions(content, self.topic)

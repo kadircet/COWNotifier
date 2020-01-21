@@ -296,8 +296,7 @@ Source is available at https://github.com/kadircet/COWNotifier
 
     def sendArticle(self, cid, article):
         self.sendMsg(cid, article.getAsHtml())
-        for attachment in article.getAttachments():
-            self.sendAttachment(cid, attachment)
+        # TODO: Send attachments
 
     def sendMsg(self, cid, text):
         if text is None:
