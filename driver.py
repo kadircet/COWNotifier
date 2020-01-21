@@ -19,7 +19,7 @@ def getConf(storage):
         'port': 443,
         'user': 'UNAME',
         'pass': 'PASS',
-        'last': 'lpost_id'
+        'last': 'lpost_file'
     }
     conf['db'] = {
         'host': 'HOST',
