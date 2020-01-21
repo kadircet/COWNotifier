@@ -304,7 +304,7 @@ Source is available at https://github.com/kadircet/COWNotifier
         data = {}
         data['method'] = 'sendMessage'
         data['chat_id'] = cid
-        data['parse_mode'] = 'Markdown'
+        data['parse_mode'] = 'MarkdownV2'
         while len(text):
             data['text'] = text[:4096]
             text = text[4096:]

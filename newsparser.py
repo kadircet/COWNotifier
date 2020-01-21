@@ -88,6 +88,7 @@ class newsArticle:
             content = self.raw_msg
             # TODO: Parse Markup
             content = self.parseLinks(content)
+            content = ''.join(['\\'+c for c in content if ord(c) > 0 and ord(c) < 128])
             self.mention_manager.parseMentions(content, self.topic)
             self.content = hdr + content
         except Exception as e:
