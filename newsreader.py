@@ -142,6 +142,8 @@ class newsReader:
             # post information we get through 'posts/{id}.json'
             # doesn't contain category_id and topic_title so
             # we need to make another request for that info.
+            # TODO: Cache topic_id -> category_id and
+            #       topic_id -> topic_title mappings
 
             # Get post's topic for category and title
             topic, code = self.makeAPICall(f"t/{post['topic_id']}.json")
