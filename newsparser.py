@@ -1,3 +1,4 @@
+from html.parser import HTMLParser
 import os
 import datetime
 import traceback
@@ -5,6 +6,18 @@ import re
 
 def isPlusOne(msg):
     return msg.startswith("+1") and len(msg) < 10
+
+class articleParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.reset()
+        self.fed = []
+
+    def handle_data(self, d):
+        self.fed.append(d)
+
+    def get_data(self):
+        return ''.join(self.fed)
 
 class newsArticle:
     def __init__(self, author, topic, subject, date, raw_msg, raw_html, mention_manager):
@@ -35,12 +48,12 @@ class newsArticle:
     #  Extract the images and files in the message
 
     def makeHeader(self):
-        hdr = f"```\r\n"\
+        hdr = f"<code>"\
             f"From: {self.author_username}({self.author_displayname})\r\n"\
             f"Newsgroup: {self.topic}\r\n"\
             f"Subject: {self.subject}\r\n"\
             f"Date: {self.date}\r\n"\
-            f"is_plus_one: {self.isPlusOne()}```\n\n"
+            f"is_plus_one: {self.isPlusOne()}</code>\n\n"
         return hdr
 
     def parseLinks(self, msg):
@@ -85,10 +98,12 @@ class newsArticle:
 
         try:
             hdr = self.makeHeader()
-            content = self.raw_msg
+            p = articleParser()
+            p.feed(self.raw_html)
+            content = p.get_data()
             # TODO: Parse Markup
-            content = self.parseLinks(content)
-            content = ''.join(['\\'+c for c in content if ord(c) > 0 and ord(c) < 128])
+            # content = self.parseLinks(content)
+            # content = ''.join(['\\'+c for c in content if ord(c) > 0 and ord(c) < 128])
             self.mention_manager.parseMentions(content, self.topic)
             self.content = hdr + content
         except Exception as e:

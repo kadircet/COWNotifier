@@ -37,7 +37,7 @@ class cowBot(threading.Thread):
                 for entry in entries:
                     cat_id = entry[0]
                     relevant_posts = posts.get(cat_id, [])
-                    for user in entry[2]:
+                    for user in entry[1]:
                         for msg in relevant_posts:
                             if not user[1] or not msg.isPlusOne():
                                 self.sendArticle(user[0], msg)
@@ -138,6 +138,13 @@ class cowBot(threading.Thread):
         else:
             msg = ""
             for topic in res:
+                try:
+                    cat_id = int(topic)
+                    topic = self.rdr.categories.get(cat_id, None)
+                    if not topic:
+                        continue
+                except:
+                    pass
                 msg += topic + "\r\n"
             if msg == "":
                 msg = "You haven't added any topics yet"
@@ -304,7 +311,7 @@ Source is available at https://github.com/kadircet/COWNotifier
         data = {}
         data['method'] = 'sendMessage'
         data['chat_id'] = cid
-        data['parse_mode'] = 'MarkdownV2'
+        data['parse_mode'] = 'HTML'
         while len(text):
             data['text'] = text[:4096]
             text = text[4096:]

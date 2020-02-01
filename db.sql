@@ -11,11 +11,10 @@ CREATE TABLE IF NOT EXISTS `users` (
 CREATE TABLE IF NOT EXISTS `topics` (
   `id` int not null auto_increment,
   `cid` int not null,
-  `cat_id` int not null,
   `topic` varchar(255) not null,
   primary key(id),
   foreign key(`cid`) references users(`cid`),
-  unique `ident` (`cid`, `topic`, `cat_id`)
+  unique `ident` (`cid`, `topic`)
 );
 
 CREATE TABLE IF NOT EXISTS `aliases` (

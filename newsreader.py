@@ -70,7 +70,7 @@ class newsReader:
                 self.last_post = int(f.read().strip())
         except Exception as e:
             self.last_post = None
-            print(e, datetime.datetime.datetime.now())
+            print(e, datetime.datetime.now())
             traceback.print_exc()
 
         # Update the last stored post id
