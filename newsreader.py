@@ -134,10 +134,10 @@ class newsReader:
             # Get post
             post, code = self.makeAPICall(f'posts/{start}.json')
             if post == None:
-                if code == 403:
+                if code == 403 or code == 404:
                     continue
-                else:
-                    break
+                start -= 1
+                break
             post = post.json()
             # post information we get through 'posts/{id}.json'
             # doesn't contain category_id and topic_title so
@@ -148,10 +148,10 @@ class newsReader:
             # Get post's topic for category and title
             topic, code = self.makeAPICall(f"t/{post['topic_id']}.json")
             if topic == None:
-                if code == 403:
+                if code == 403 or code == 404:
                     continue
-                else:
-                    break
+                start -= 1
+                break
             topic = topic.json()
             if topic['category_id'] not in res:
                 res[topic['category_id']] = []

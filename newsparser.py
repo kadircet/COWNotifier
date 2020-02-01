@@ -1,3 +1,4 @@
+import html
 from html.parser import HTMLParser
 import os
 import datetime
@@ -13,11 +14,19 @@ class articleParser(HTMLParser):
         self.reset()
         self.fed = []
 
+    def handle_starttag(self, tag, attrs):
+        if tag != "img":
+            return
+        for attr in attrs:
+            if attr[0] != "src":
+                continue
+            self.fed.append(attr[1])
+
     def handle_data(self, d):
         self.fed.append(d)
 
     def get_data(self):
-        return ''.join(self.fed)
+        return html.escape(''.join(self.fed))
 
 class newsArticle:
     def __init__(self, author, topic, subject, date, raw_msg, raw_html, mention_manager):
@@ -48,13 +57,12 @@ class newsArticle:
     #  Extract the images and files in the message
 
     def makeHeader(self):
-        hdr = f"<code>"\
-            f"From: {self.author_username}({self.author_displayname})\r\n"\
+        hdr = f"From: {self.author_username}({self.author_displayname})\r\n"\
             f"Newsgroup: {self.topic}\r\n"\
             f"Subject: {self.subject}\r\n"\
             f"Date: {self.date}\r\n"\
-            f"is_plus_one: {self.isPlusOne()}</code>\n\n"
-        return hdr
+            f"is_plus_one: {self.isPlusOne()}\n\n"
+        return "<code>"+html.escape(hdr)+"</code>"
 
     def parseLinks(self, msg):
         # In markdown, discourse uses the following format for images and image links
