@@ -178,7 +178,10 @@ class dataBase:
         try:
             cur.execute(sql, (cid, ))
             for row in cur:
-                res.append(row[0])
+                try:
+                    res.append(self.rdr.categories.get(int(row[0]), ""))
+                except:
+                    continue
         except Exception as e:
             print(e, datetime.datetime.now())
             traceback.print_exc()
