@@ -83,7 +83,7 @@ class cowBot(threading.Thread):
             self.sendMsg(data['cid'], self.texts['invalid'])
             return
 
-        topic = text[1]
+        topic = ' '.join(text[1:])
         self.db.ping()
         res, added_topic = self.db.addTopic(data['cid'], topic)
 
