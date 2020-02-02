@@ -135,30 +135,15 @@ class cowBot(threading.Thread):
         res = self.db.getTopicsByCid(data['cid'])
         if res is None:
             msg = self.texts['error'].format(data['uname'])
+        elif len(res) > 0:
+            msg = "\r\n".join(res)
         else:
-            msg = ""
-            for topic in res:
-                try:
-                    cat_id = int(topic)
-                    topic = self.rdr.categories.get(cat_id, None)
-                    if not topic:
-                        continue
-                except:
-                    pass
-                msg += topic + "\r\n"
-            if msg == "":
-                msg = "You haven't added any topics yet"
+            msg = "You haven't added any topics yet"
 
         self.sendMsg(data['cid'], msg)
 
     def listAll(self, data):
-        self.db.ping()
-        res = self.db.getTopicsByCid(data['cid'])
-        if res is None:
-            msg = self.texts['error'].format(data['uname'])
-        else:
-            msg = "\n".join(self.rdr.categories.values())
-
+        msg = "\n".join(self.rdr.categories.values())
         self.sendMsg(data['cid'], msg)
 
     def addAliasHandler(self, data):

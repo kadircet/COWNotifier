@@ -61,8 +61,8 @@ class newsArticle:
             f"Newsgroup: {self.topic}\r\n"\
             f"Subject: {self.subject}\r\n"\
             f"Date: {self.date}\r\n"\
-            f"is_plus_one: {self.isPlusOne()}\n\n"
-        return "<code>"+html.escape(hdr)+"</code>"
+            f"is_plus_one: {self.isPlusOne()}"
+        return "<code>"+html.escape(hdr)+"</code>\n\n"
 
     def parseLinks(self, msg):
         # In markdown, discourse uses the following format for images and image links
