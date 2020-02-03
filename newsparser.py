@@ -10,6 +10,23 @@ def isPlusOne(msg):
   return msg.startswith("+1") and len(msg) < 10
 
 
+def getHumanReadableDate(date):
+  # Date is expected to be a tuple of two elements, from newsreader.
+  # date[0] -> message's date in raw form: %Y:%m:%dT%H:%M:%S.xxZ
+  # where 'xx's and Z represent nanosecs(?) and the UTC +0 respectively.
+  # date[1] -> list of timezone difference to localzone, Turkey's is UTC 3.00,
+  #            so it is [3, 0] representing hours and minutes by default.
+  rawDate, localTimezone = date
+  # Parse the raw format and add localTimezone's hour difference.
+
+  machineDate = datetime.datetime.strptime(rawDate.split('.')[0],
+    "%Y-%m-%dT%H:%M:%S") + datetime.timedelta(hours=localTimezone)
+  # return the human readable from, refer to datetime.strftime for format
+  # options.
+  # an example of current format: 03 Feb 2020, 18:30:00
+  return machineDate.strftime("%d %b %Y, %H:%M:%S")
+
+
 class articleParser(HTMLParser):
 
   def __init__(self):
@@ -40,7 +57,7 @@ class newsArticle:
     self.author_displayname = author[1]
     self.topic = topic
     self.subject = subject
-    self.date = date
+    self.date = getHumanReadableDate(date)
     self.raw_msg = raw_msg
     self.raw_html = raw_html
     self.mention_manager = mention_manager
