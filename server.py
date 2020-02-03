@@ -9,45 +9,48 @@ import socket
 
 
 class webHook(threading.Thread):
-    class ReqHandler(BaseHTTPRequestHandler):
-        def do_GET(self):
-            try:
-                self.send_response(200)
-                self.end_headers()
-                if self.path == '/' + self.token:
-                    data = self.rfile.read(
-                        int(self.headers['Content-Length'])).decode('utf-8')
-                    data = json.loads(data)
-                    print(data)
-                    self.q.put(data)
-            except Exception as e:
-                print(e, datetime.datetime.now())
-                traceback.print_exc()
 
-        def do_POST(self):
-            self.do_GET()
+  class ReqHandler(BaseHTTPRequestHandler):
 
-    class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
-        def get_request(self):
-            newsock, addr = self.socket.accept()
-            newsock = ssl.wrap_socket(
-                newsock,
-                certfile=self.certfile,
-                do_handshake_on_connect=False,
-                server_side=True)
-            timeout = newsock.gettimeout()
-            newsock.settimeout(2.)
-            newsock.do_handshake()
-            newsock.settimeout(timeout)
-            return newsock, addr
+    def do_GET(self):
+      try:
+        self.send_response(200)
+        self.end_headers()
+        if self.path == '/' + self.token:
+          data = self.rfile.read(int(
+              self.headers['Content-Length'])).decode('utf-8')
+          data = json.loads(data)
+          print(data)
+          self.q.put(data)
+      except Exception as e:
+        print(e, datetime.datetime.now())
+        traceback.print_exc()
 
-    def __init__(self, conf, q):
-        threading.Thread.__init__(self)
-        self.ReqHandler.token = conf['bot']['token']
-        self.ReqHandler.q = q
-        httpd = self.ThreadedHTTPServer(('0.0.0.0', 8443), self.ReqHandler)
-        httpd.certfile = conf['web']['cert']
-        self.httpd = httpd
+    def do_POST(self):
+      self.do_GET()
 
-    def run(self):
-        self.httpd.serve_forever()
+  class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+
+    def get_request(self):
+      newsock, addr = self.socket.accept()
+      newsock = ssl.wrap_socket(
+          newsock,
+          certfile=self.certfile,
+          do_handshake_on_connect=False,
+          server_side=True)
+      timeout = newsock.gettimeout()
+      newsock.settimeout(2.)
+      newsock.do_handshake()
+      newsock.settimeout(timeout)
+      return newsock, addr
+
+  def __init__(self, conf, q):
+    threading.Thread.__init__(self)
+    self.ReqHandler.token = conf['bot']['token']
+    self.ReqHandler.q = q
+    httpd = self.ThreadedHTTPServer(('0.0.0.0', 8443), self.ReqHandler)
+    httpd.certfile = conf['web']['cert']
+    self.httpd = httpd
+
+  def run(self):
+    self.httpd.serve_forever()
