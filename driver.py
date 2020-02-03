@@ -19,7 +19,8 @@ def getConf(storage):
       'port': 443,
       'user': 'UNAME',
       'pass': 'PASS',
-      'last': 'lpost_file'
+      'last': 'lpost_file',
+      'timezone': "3.00"  # Timezone difference to UTC-Z in the form of: "x.yz" or "-x.yz"
   }
   conf['db'] = {
       'host': 'HOST',

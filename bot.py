@@ -18,7 +18,8 @@ class cowBot(threading.Thread):
     self.q = q
     self.rdr = newsReader(conf['news']['host'], conf['news']['port'],
                           conf['news']['user'], conf['news']['pass'],
-                          conf['news']['last'], conf['news']['auth'])
+                          conf['news']['last'], conf['news']['auth'],
+                          conf['news']['timezone'])
     self.db = dataBase(conf['db']['host'], conf['db']['user'],
                        conf['db']['pass'], conf['db']['name'], self.rdr)
     self.mention_manager = mentionManager(self.db, self)

@@ -11,9 +11,11 @@ from newsparser import newsArticle
 
 class newsReader:
 
-  def __init__(self, host, port, uname, pw, lfile, auth):
+  def __init__(self, host, port, uname, pw, lfile, auth, timezone):
     self.conparams = [host, port, uname, pw, auth]
     self.lfile = lfile
+    self.timezone = [int(timezone[:-3]), 
+                    int(timezone[-2:]) if timezone[0] != '-' else -int(timezone[-2:])]
     self.initialized = False
     self.initConnection()
 
@@ -167,7 +169,7 @@ class newsReader:
               (post['username'], post['name']),
               self.categories[topic['category_id']],
               topic['title'],
-              post['created_at'],
+              (post['created_at'], self.timezone),
               post['raw'],  # raw msg (markdown)
               post['cooked'],  # mgs in html format
               mention_manager))
