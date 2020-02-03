@@ -19,10 +19,8 @@ def getHumanReadableDate(date):
   rawDate, localTimezone = date
   # Parse the raw format and add localTimezone's hour difference.
 
-  hours = localTimezone[0]
-  minutes = localTimezone[1]
   machineDate = datetime.datetime.strptime(rawDate.split('.')[0],
-    "%Y-%m-%dT%H:%M:%S") + datetime.timedelta(hours=hours, minutes=minutes)
+    "%Y-%m-%dT%H:%M:%S") + datetime.timedelta(hours=localTimezone)
   # return the human readable from, refer to datetime.strftime for format
   # options.
   # an example of current format: 03 Feb 2020, 18:30:00

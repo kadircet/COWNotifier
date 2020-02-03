@@ -14,8 +14,7 @@ class newsReader:
   def __init__(self, host, port, uname, pw, lfile, auth, timezone):
     self.conparams = [host, port, uname, pw, auth]
     self.lfile = lfile
-    self.timezone = [int(timezone[:-3]), 
-                    int(timezone[-2:]) if timezone[0] != '-' else -int(timezone[-2:])]
+    self.timezone = timezone
     self.initialized = False
     self.initConnection()
 
