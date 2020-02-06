@@ -132,42 +132,6 @@ class newsArticle:
         f"is_plus_one: {self.isPlusOne()}"
     return "<code>" + html.escape(hdr) + "</code>\n\n"
 
-  def parseLinks(self, msg):
-    # In markdown, discourse uses the following format for images and image links
-    #     ![image_name](upload://<file_name_hash>)
-    # However, in the html version of the message image links are regular http(s)
-    # links. This part of the code removes the upload:// urls from the markdown and
-    # replaces them with the image links from the html version.
-    regex = r"!\[([^\]]*)\]\(([^\)]*)\)"
-    img_tag = '<img src=\"'
-    pattern = re.compile(regex)
-    parsed = ""
-    link_counter = 1
-    last_pos = 0
-    for m in pattern.finditer(msg):
-      # Find link name
-      name_start, name_end = m.span(1)
-      link_name = msg[name_start:name_end]
-      if link_name == "":
-        link_name = f"Link {link_counter}"
-
-      # Find first img link in html
-      html_link_start = self.raw_html.find(img_tag) + len(img_tag)
-      html_link_len = self.raw_html[html_link_start:].find('"')
-      html_link = self.raw_html[html_link_start:html_link_start + html_link_len]
-      # Discard used html
-      self.raw_html = self.raw_html[html_link_start + html_link_len:]
-
-      # Replace link in markdown
-      match_start, match_end = m.span()
-      parsed += msg[last_pos:match_start] + f"[{link_name}]({html_link})"
-
-      last_pos = match_end
-      link_counter += 1
-
-    parsed += msg[last_pos:]
-    return parsed
-
   def parseMessage(self):
     if self.broken:
       return
@@ -177,9 +141,6 @@ class newsArticle:
       p = articleParser()
       p.feed(self.raw_html)
       content = p.get_data()
-      # TODO: Parse Markup
-      # content = self.parseLinks(content)
-      # content = ''.join(['\\'+c for c in content if ord(c) > 0 and ord(c) < 128])
       self.mention_manager.parseMentions(content, self.topic)
       self.content = hdr + content
     except Exception as e:
