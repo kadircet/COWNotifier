@@ -1,14 +1,14 @@
 # COWNotifier
 Get notifications via a Telegram bot for your favorite news groups.
-Generic sever allows multiple users to create and manage followlist
+Generic server allows multiple users to create and manage followlist
 within a news server and get notifications whenever a new post has
 been made to one of those groups.
 
 ## Usage
 ### Server side
-Clone the repo then edit driver.py's getConfig function for the first
-setup, by giving the Telegram Bot's token, yourserver url etc. function
-is self-explanatory. Then run driver.py.
+Clone the repo then edit driver.py's `getConfig` function for the first
+setup, by giving the Telegram Bot's token, your server's URL etc. Function
+is self-explanatory. Then run `driver.py`.
 
 ### Bot Side
 /start - Create a record within the server for the followlist<br/>
