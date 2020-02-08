@@ -1,8 +1,11 @@
+from html.parser import HTMLParser
+
+
 class HTMLSplitter(HTMLParser):
   # Splits a given html into 4095 byte chunks while keeping each chunk as a
   # valid html
   def __init__(self):
-    super(MyParser, self).__init__(convert_charrefs=False)
+    super().__init__(convert_charrefs=False)
     self.opened_tags = []
     self.parsed_msgs = []
     self.current_msg = []
@@ -43,14 +46,14 @@ class HTMLSplitter(HTMLParser):
       return
     attr_list = [f'{at[0]}="{at[1]}"' for at in attrs]
     attr_str = ' '.join([''] + attr_list)
-    tag_len = len(f'<{ptag+attr_str}>')
-    tag_close_len = len(f'</{ptag}>')
+    tag_len = len(f'<{tag+attr_str}>')
+    tag_close_len = len(f'</{tag}>')
     cur_len = self.getCurrentMsgLen()
     closing_len = self.getClosingTagsLen()
     if cur_len + closing_len + tag_len + tag_close_len > 4095:
       self.finishMsg()
-      self.opened_tags.append((ptag, attr_str))
-      self.current_msg.append(f'<{ptag+attr_str}>')
+    self.opened_tags.append((tag, attr_str))
+    self.current_msg.append(f'<{tag+attr_str}>')
 
   def handle_data(self, data):
     while len(data):
@@ -77,4 +80,4 @@ class HTMLSplitter(HTMLParser):
     self.parsed_msgs = []
     self.current_msg = []
     self.dup_newline = False
-    super(MyParser, self).reset()
+    super().reset()
