@@ -5,7 +5,7 @@ URL = "https://gist.githubusercontent.com/hbostann/b95739045411eec0518d282b91c25
 
 def generateEmojiFile(filename):
   resp = requests.get(URL)
-  with open(filename, 'w') as emoji_codepoints:
+  with open(filename, 'w', encoding='utf-8') as emoji_codepoints:
     emoji_codepoints.write("# Generated\n\nemoji = {\n")
     for line in resp.text.splitlines():
       name, code = line.split(",")
