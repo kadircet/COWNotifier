@@ -7,7 +7,6 @@ import threading
 from database import dataBase
 from newsreader import newsReader
 from mention_manager import mentionManager
-from html_splitter import HTMLSplitter
 
 
 class cowBot(threading.Thread):
@@ -289,11 +288,7 @@ Source is available at https://github.com/kadircet/COWNotifier
     }
 
   def sendArticle(self, cid, article):
-    p = HTMLSplitter()
-    p.feed(article.getAsHtml())
-    chunks = p.get_messages()
-    for chunk in chunks:
-      self.sendMsg(cid, chunk)
+    self.sendMsg(cid, article.getAsHtml())
     # TODO: Send attachments
 
   def sendMsg(self, cid, text):

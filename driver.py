@@ -3,6 +3,11 @@ import json
 import datetime
 import traceback
 import queue
+
+# TODO: Fix this mess :)
+if not os.path.exists('emoji_codepoints.py'):
+  import emoji_gen
+  emoji_gen.generateEmojiFile('emoji_codepoints.py')
 from bot import cowBot
 from server import webHook
 

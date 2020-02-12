@@ -40,20 +40,75 @@ class articleParser(HTMLParser):
   # Handle Image: Images are wrapped in <a> tags with href same as img's src.
   #               (<a><img></a>) In this case parser removes the <img> tag
   #               completely since Telegram handles <a> tags pretty well with
-  #               previews. (Also telegram doesn't support <img> tags)
+  #               previews. (Also telegram doesn't support <img> tags). In
+  #               the future, we may want to ditch the telegram's preview to
+  #               handle multiple images (preview only shows the first image)
+  #               TODO: Handle images as attachements, preferably as albums.
   # Handle Emoji: Emojis are represented as <img> tags but they are not wrapped
   #               in <a> tags, unlike the previous case. Parser replaces <img>
   #               tags with 'class="emoji"' with their unicode codepoint.
 
   # Tags supported by Telegram
+  # https://core.telegram.org/bots/api#html-style
   supported_tags = [
       'strike', 'i', 'strong', 'b', 'pre', 'ins', 'a', 'code', 'del', 's', 'em',
       'u'
   ]
-  # Useful attributes to look for
-  useful_attrs = ['href', 'title', 'class']
   # html_tag -> telegram_tag mapping for formatting purposes
   tag_mapping = {'h1': 'b', 'h2': 'b', 'h3': 'b', 'blockquote': 'i'}
+
+  def __init__(self):
+    super().__init__(convert_charrefs=False)
+    self.reset()
+    self.open_tags = []
+    self.fed = []
+
+  def handle_entityref(self, name):
+    # This is done so that html entities like '&gt;' remain escaped.
+    self.fed.append(f'&{name};')
+
+  def handle_starttag(self, tag, attrs):
+    tag_attrs = {at[0]: at[1] for at in attrs}
+    if tag == 'a':
+      href = tag_attrs.get('href', '#')
+      if href == '#':
+        print(f"<a> with no href: {tag} -> {tag_attrs}")
+      self.fed.append(f'<a href="{href}">')
+      self.open_tags.append('a')
+      return
+    if tag == 'img':
+      if tag_attrs.get('class', '') == 'emoji':
+        self.fed.append(emoji.get(tag_attrs.get('title', ':cow:'), ''))
+        return
+      if len(self.open_tags) == 0 or self.open_tags[-1] != 'a':
+        self.fed.append(f"<a href=\"{tag_attrs.get('src', '#')}\">Image</a>")
+        print("Image not wrapped in <a> tags: {tag} -> {tag_attrs}")
+      return
+    if tag not in self.supported_tags:
+      tag = self.tag_mapping.get(tag, None)
+    if not tag:
+      return
+    self.fed.append(f'<{tag}>')
+    self.open_tags.append(tag)
+
+  def handle_data(self, data):
+    self.fed.append(data)
+
+  def handle_endtag(self, tag):
+    # If tag is not supported, it is never added to open_tags so we do nothing
+    # otherwise, we pop the open_tags and close the tag in the message.
+    if tag not in self.supported_tags:
+      tag = self.tag_mapping.get(tag, None)
+    if not tag or tag != self.open_tags[-1]:
+      return
+    self.open_tags.pop()
+    self.fed.append(f'</{tag}>')
+
+  def get_data(self):
+    return "".join(self.fed)
+
+
+class legacyParser(HTMLParser):
 
   def __init__(self):
     super().__init__(convert_charrefs=False)
@@ -65,31 +120,16 @@ class articleParser(HTMLParser):
     self.fed.append(f'&{name};')
 
   def handle_starttag(self, tag, attrs):
-    tag_attrs = {at[0]: at[1] for at in attrs if at[0] in self.useful_attrs}
-    ptag = tag
-    if ptag not in self.supported_tags:
-      # If tag is not supported, convert it
-      ptag = self.tag_mapping.get(ptag, None)
-    if ptag != None:
-      # If tag is supported or converted add it to the message
-      attr_str = ' href=\"' + tag_attrs.get('href',
-                                            '') + '\"' if tag == 'a' else ''
-      self.fed.append(f'<{ptag+attr_str}>')
-    # Look for emojis
-    if tag == 'img' and tag_attrs.get('class', '') == 'emoji':
+    if tag != "img":
+      return
+    tag_attrs = {at[0]: at[1] for at in attrs}
+    if tag_attrs.get('class', '') == 'emoji':
       self.fed.append(emoji.get(tag_attrs.get('title', ':cow:'), ''))
       return
+    self.fed.append(f"<a href=\"{tag_attrs.get('src', '#')}\">Image</a>")
 
-  def handle_data(self, data):
-    self.fed.append(data)
-
-  def handle_endtag(self, tag):
-    # If tag is not supported/converted we don't need it's closing tag since
-    # it is never opened.
-    if tag not in self.supported_tags:
-      tag = self.tag_mapping.get(tag, None)
-    if tag != None:
-      self.fed.append(f'</{tag}>')
+  def handle_data(self, d):
+    self.fed.append(d)
 
   def get_data(self):
     return "".join(self.fed)
@@ -141,6 +181,10 @@ class newsArticle:
       p = articleParser()
       p.feed(self.raw_html)
       content = p.get_data()
+      if (len(content) > 4095):
+        p = legacyParser()
+        p.feed(self.raw_html)
+        content = p.get_data()
       self.mention_manager.parseMentions(content, self.topic)
       self.content = hdr + content
     except Exception as e:
