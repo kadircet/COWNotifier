@@ -288,7 +288,7 @@ Source is available at https://github.com/kadircet/COWNotifier
     }
 
   def sendArticle(self, cid, article):
-    self.sendMsg(cid, article.getAsHtml())
+    self.sendMsg(cid, article.parse())
     # TODO: Send attachments
 
   def sendMsg(self, cid, text):
@@ -297,7 +297,7 @@ Source is available at https://github.com/kadircet/COWNotifier
     data = {}
     data['method'] = 'sendMessage'
     data['chat_id'] = cid
-    data['parse_mode'] = 'HTML'
+    data['parse_mode'] = 'MarkdownV2'
     while len(text):
       data['text'] = text[:4096]
       text = text[4096:]

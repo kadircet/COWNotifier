@@ -163,6 +163,7 @@ class newsReader:
       topic = topic.json()
       if topic['category_id'] not in res:
         res[topic['category_id']] = []
+      # TODO(kadircet): Also include link to the post via topic_id and post_count.
       res[topic['category_id']].append(
           newsArticle(
               (post['username'], post['name']),
@@ -170,7 +171,6 @@ class newsReader:
               topic['title'],
               (post['created_at'], self.timezone),
               post['raw'],  # raw msg (markdown)
-              post['cooked'],  # mgs in html format
               mention_manager))
     self.last_post = start
     with open(self.lfile, 'w') as f:
