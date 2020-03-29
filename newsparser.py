@@ -8,7 +8,7 @@ from emoji_codepoints import emoji
 
 
 def isPlusOne(msg):
-  return msg.startswith("+1") and len(msg) < 10
+  return msg.startswith('+1') and len(msg) < 10
 
 
 def getHumanReadableDate(date):
@@ -22,11 +22,11 @@ def getHumanReadableDate(date):
 
   machineDate = datetime.datetime.strptime(
       rawDate.split('.')[0],
-      "%Y-%m-%dT%H:%M:%S") + datetime.timedelta(hours=localTimezone)
+      '%Y-%m-%dT%H:%M:%S') + datetime.timedelta(hours=localTimezone)
   # return the human readable from, refer to datetime.strftime for format
   # options.
   # an example of current format: 03 Feb 2020, 18:30:00
-  return machineDate.strftime("%d %b %Y, %H:%M:%S")
+  return machineDate.strftime('%d %b %Y, %H:%M:%S')
 
 
 class articleParser(HTMLParser):
@@ -82,7 +82,7 @@ class articleParser(HTMLParser):
         return
       if len(self.open_tags) == 0 or self.open_tags[-1] != 'a':
         self.fed.append(f"<a href=\"{tag_attrs.get('src', '#')}\">Image</a>")
-        print("Image not wrapped in <a> tags: {tag} -> {tag_attrs}")
+        print('Image not wrapped in <a> tags: {tag} -> {tag_attrs}')
       return
     if tag not in self.supported_tags:
       tag = self.tag_mapping.get(tag, None)
@@ -105,7 +105,7 @@ class articleParser(HTMLParser):
     self.fed.append(f'</{tag}>')
 
   def get_data(self):
-    return "".join(self.fed)
+    return ''.join(self.fed)
 
 
 class legacyParser(HTMLParser):
@@ -120,7 +120,7 @@ class legacyParser(HTMLParser):
     self.fed.append(f'&{name};')
 
   def handle_starttag(self, tag, attrs):
-    if tag != "img":
+    if tag != 'img':
       return
     tag_attrs = {at[0]: at[1] for at in attrs}
     if tag_attrs.get('class', '') == 'emoji':
@@ -132,7 +132,7 @@ class legacyParser(HTMLParser):
     self.fed.append(d)
 
   def get_data(self):
-    return "".join(self.fed)
+    return ''.join(self.fed)
 
 
 class newsArticle:
@@ -170,7 +170,7 @@ class newsArticle:
         f"Subject: {self.subject}\r\n"\
         f"Date: {self.date}\r\n"\
         f"is_plus_one: {self.isPlusOne()}"
-    return "<code>" + html.escape(hdr) + "</code>\n\n"
+    return '<code>' + html.escape(hdr) + '</code>\n\n'
 
   def parseMessage(self):
     if self.broken:
