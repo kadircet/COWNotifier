@@ -7,6 +7,7 @@ import threading
 from database import dataBase
 from newsreader import newsReader
 from mention_manager import mentionManager
+from markdownrenderer import escape
 
 
 class cowBot(threading.Thread):
@@ -288,12 +289,14 @@ Source is available at https://github.com/kadircet/COWNotifier
     }
 
   def sendArticle(self, cid, article):
-    self.sendMsg(cid, article.parse())
+    self.sendMsg(cid, article.parse(), escaped=True)
     # TODO: Send attachments
 
-  def sendMsg(self, cid, text):
+  def sendMsg(self, cid, text, escaped=False):
     if text is None:
       return
+    if not escaped:
+      text = escape(text)
     data = {}
     data['method'] = 'sendMessage'
     data['chat_id'] = cid
