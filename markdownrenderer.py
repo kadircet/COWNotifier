@@ -82,6 +82,7 @@ def escape(text, inCodeBlock=False):
 
 
 class telegramRenderer(mistune.renderers.BaseRenderer):
+  """Renderer to convert discourse markdown into telegram supported dialect."""
   NAME = 'telegram'
   IS_TREE = True
 
@@ -117,10 +118,10 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
     return emoji.get(text, f'{text}')
 
   def list(self, children_and_levels, ordered, depth, start=None):
-    if start is None:
-      start = 1
     logger.debug('list: {} {} {} {}', children_and_levels, ordered, depth,
                  start)
+    if start is None:
+      start = 1
     res = []
     base_padding = '  ' * (depth - 1)
     for children, level in children_and_levels:
@@ -200,9 +201,7 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
 
 
 def convertDiscourseToTelegram(content):
-  logger.debug('Got contents: {}', content)
   renderer = telegramRenderer()
   paragraphs = mistune.markdown(
       content, renderer=renderer, plugins=[pluginEmoji, pluginQuote])
-  logger.debug('Got paragraphs: {}', paragraphs)
   return paragraphs

@@ -7,6 +7,9 @@ import json
 import requests
 import sys
 from newsparser import newsArticle
+from logger import getLogger
+
+logger = getLogger(__name__)
 
 
 class newsReader:
@@ -48,17 +51,17 @@ class newsReader:
         resp.raise_for_status()
         return resp, resp.status_code
       except requests.exceptions.RequestException as e:
-        print(
-            f"[X] Request Failed: {e} -- Endpoint: {endpoint}, Data: {params}")
+        logger.error('Request Failed: {} -- Endpoint: {}, Data: {}', e,
+                     endpoint, params)
         resp = None
         if not retry:
           return resp, e.response.status_code
-        print(f"[*] Retrying in {backoff} seconds")
+        logger.error('Retrying in {} seconds', backoff)
         time.sleep(backoff)
         backoff = max(60, backoff * 2)
       except Exception as e:
         # Something outside "requests" library failed
-        print(e, datetime.datetime.now())
+        logger.error('{} {}', e, datetime.datetime.now())
         traceback.print_exc()
         sys.exit(1)
 
@@ -79,7 +82,7 @@ class newsReader:
         self.last_post = int(f.read().strip())
     except Exception as e:
       self.last_post = None
-      print(e, datetime.datetime.now())
+      logger.error('{} {}', e, datetime.datetime.now())
       traceback.print_exc()
 
     # Update the last stored post id
@@ -102,7 +105,7 @@ class newsReader:
       if cookie.startswith('_t='):
         self.token = {'_t': cookie[3:]}
         self.time = time.time()
-        print(f'[*] New Auth Token: {self.token} acquired at {self.time}')
+        logger.info('New Auth Token: {} acquired at {}', self.token, self.time)
         break
 
   def getIdForTopic(self, topic):
