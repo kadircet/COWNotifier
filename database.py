@@ -100,8 +100,11 @@ class dataBase:
   def addTopic(self, cid, topic):
     if not self.rdr.validTopic(topic):
       topic = self.rdr.closest(topic)
-      if topic is None:
+      if len(topic) == 0:
         return (2, topic)
+      if len(topic) != 1:
+        return (4, topic)
+      topic = topic[0]
     cat_id = self.rdr.getIdForTopic(topic)
     if cat_id == -1:
       return (2, topic)
@@ -128,8 +131,11 @@ class dataBase:
   def deleteTopic(self, cid, topic):
     if not self.rdr.validTopic(topic):
       topic = self.rdr.closest(topic, self.getTopicsByCid(cid))
-      if topic is None:
+      if len(topic) == 0:
         return (2, topic)
+      if len(topic) != 1:
+        return (4, topic)
+      topic = topic[0]
     cat_id = self.rdr.getIdForTopic(topic)
     if cat_id == -1:
       return (2, topic)

@@ -135,10 +135,11 @@ class newsReader:
   def closest(self, topic, topics=None):
     if topics == None:
       topics = self.categories.values()
+    pos = []
     for t in topics:
-      if t.lower().startswith(topic.lower()):
-        return t
-    return None
+      if t.lower().endswith(topic.lower()):
+        pos.append(t)
+    return pos
 
   def updatePosts(self, mention_manager):
     if not self.initialized:

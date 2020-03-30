@@ -97,6 +97,8 @@ class cowBot(threading.Thread):
       msg = self.texts['exists'].format(added_topic)
     elif res == 2:
       msg = self.texts['notfound'].format(topic)
+    elif res == 4:
+      msg = self.texts['ambiguous'].format(added_topic)
 
     self.sendMsg(data['cid'], msg)
 
@@ -130,6 +132,8 @@ class cowBot(threading.Thread):
       msg = self.texts['notexists'].format(deleted_topic)
     elif res == 2:
       msg = self.texts['notfound'].format(topic)
+    elif res == 4:
+      msg = self.texts['ambiguous'].format(deleted_topic)
 
     self.sendMsg(data['cid'], msg)
 
@@ -270,6 +274,7 @@ Source is available at https://github.com/kadircet/COWNotifier
     self.texts[
         'aliasexists'] = """You already have {} as one of your aliases."""
     self.texts['noalias'] = """You forgot to provide an alias."""
+    self.texts['ambiguous'] = """Ambiguous selection: {}."""
 
   def registerHandlers(self):
     self.handlers = {
