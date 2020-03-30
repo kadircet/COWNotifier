@@ -11,7 +11,7 @@ if not os.path.exists('emoji_codepoints.py'):
   emoji_gen.generateEmojiFile('emoji_codepoints.py')
 from bot import cowBot
 from server import webHook
-from logging import getLogger
+from logger import getLogger
 
 logger = getLogger(__name__)
 
