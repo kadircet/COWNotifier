@@ -65,16 +65,31 @@ class newsReader:
         traceback.print_exc()
         sys.exit(1)
 
+  def populateCategories(self):
+    # Grab category ids and names
+    categories = {}
+    resp, _ = self.makeAPICall('site.json', retry=True)
+    resp_categories = resp.json()['categories']
+    parent = {}
+    for item in resp_categories:
+      categories[item['id']] = item['name']
+      parent[item['id']] = item.get('parent_category_id', None)
+
+    self.categories = {}
+    for id, name in categories.items():
+      parents = [name]
+      cur_id = id
+      while parent[id] is not None:
+        parents.append(categories[parent[id]])
+        id = parent[id]
+      cat_name = '.'.join(parents[::-1])
+      logger.debug('Got category: {} - {}', cur_id, cat_name)
+      self.categories[cur_id] = cat_name
+
   def initConnection(self):
     self.updateAuthToken()
     self.time = time.time()
-
-    # Grab category ids and names
-    self.categories = {}
-    resp, _ = self.makeAPICall('site.json', retry=True)
-    resp_categories = resp.json()['categories']
-    for item in resp_categories:
-      self.categories[item['id']] = item['name']
+    self.populateCategories()
 
     # Read last stored post id
     try:
