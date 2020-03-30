@@ -128,8 +128,8 @@ class newsReader:
   def updatePosts(self, mention_manager):
     if not self.initialized:
       return {}
-    # TODO: Find token expiration, 60 secs is a bit low
-    if time.time() - self.time > 60.:
+    # TODO: Find token expiration. Currently a day.
+    if time.time() - self.time > 60. * 60 * 24:
       self.updateAuthToken()
 
     # Get latest posts
