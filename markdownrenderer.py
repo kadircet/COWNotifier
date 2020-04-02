@@ -197,6 +197,11 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
     logger.debug('thematic_break')
     return escape('---')
 
+  def block_quote(self, children):
+    logger.debug('block_quote: {}', children)
+    text = '\n\n'.join(children).replace('\n', '\n\\> ')
+    return f'\\> _{text}_'
+
 
 def convertDiscourseToTelegram(content):
   logger.debug(f'Got discourse markdown: {content}')
