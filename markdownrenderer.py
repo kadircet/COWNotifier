@@ -193,6 +193,10 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
     logger.debug('codespan: {}', text)
     return f'`{text}`'
 
+  def thematic_break(self):
+    logger.debug('thematic_break')
+    return escape('---')
+
 
 def convertDiscourseToTelegram(content):
   logger.debug(f'Got discourse markdown: {content}')
