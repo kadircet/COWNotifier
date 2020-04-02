@@ -9,18 +9,6 @@ from logger import getLogger
 logger = getLogger(__name__)
 
 
-def decodeBase62(encoded):
-  alphabet = string.digits + string.ascii_lowercase + string.ascii_uppercase
-  order_map = {}
-  for idx, c in enumerate(alphabet):
-    order_map[c] = idx
-
-  num = 0
-  for idx, char in enumerate(encoded[::-1]):
-    num += alphabet.index(char) * (62**idx)
-  return hex(num)[2:]
-
-
 def pluginEmoji(md):
   """Parses markdown emojis in the form of :smiley:
 
@@ -88,6 +76,7 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
   """Renderer to convert discourse markdown into telegram supported dialect."""
   NAME = 'telegram'
   IS_TREE = True
+  UPLOAD_SCHEME = 'upload://'
 
   def __init__(self):
     super(telegramRenderer, self).__init__()
@@ -169,6 +158,9 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
 
   def link(self, link, children=None, title=None):
     logger.debug('link: {} {} {}', link, children, title)
+    if link.startswith(self.UPLOAD_SCHEME):
+      link = 'https://cow.ceng.metu.edu.tr/uploads/short-url/' + link[
+          len(self.UPLOAD_SCHEME):]
     if children is None:
       if title is None:
         children = [link]
@@ -183,11 +175,9 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
       title = alt
     if not title:
       title = 'Image'
-    UPLOAD_SCHEME = 'upload://'
-    if src.startswith(UPLOAD_SCHEME):
-      base62, _ = src[len(UPLOAD_SCHEME):].split('.')
-      src = 'https://cow.ceng.metu.edu.tr/uploads/default/' + decodeBase62(
-          base62)
+    if src.startswith(self.UPLOAD_SCHEME):
+      src = 'https://cow.ceng.metu.edu.tr/uploads/short-url/' + src[
+          len(self.UPLOAD_SCHEME):]
     #TODO(kadircet): Also send photos as attachments
     return f'[{escape(title)}]({src})'
 
