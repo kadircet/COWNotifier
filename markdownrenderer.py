@@ -39,7 +39,7 @@ def pluginQuote(md):
   """Parser for discourse quote style.
 
   These are in the form of:
-  [quote="$USER_NAME$, post:$POST_ID$, topic:$TOPIC_ID$"]
+  [quote="$USER_NAME$, post:$POST_ID$, topic:$TOPIC_ID$(, full:true)"]
   QUOTED_TEXT
   [/quote]
 
@@ -48,14 +48,17 @@ def pluginQuote(md):
   """
 
   def parseQuote(self, m, state):
+    params = m.group(1).split(',')
+    username = params[0].strip()
+    post_id = int(params[1].split(':')[1])
+    topic_id = int(params[2].split(':')[1])
     return {
         'type': 'quote',
-        'children': self.parse(m.group(4), state),
-        'params': (m.group(1), int(m.group(2)), int(m.group(3)))
+        'children': self.parse(m.group(2), state),
+        'params': (username, post_id, topic_id, params[3:])
     }
 
-  QUOTE_REGEX = re.compile(
-      r'\[quote="(.*?), post:(.*?), topic:(.*?)"\]\s*(.*?)\s*\[/quote\]\s*')
+  QUOTE_REGEX = re.compile(r'\[quote="(.*?)"\]\s*((.*?\n?)*?)\s*\[/quote\]\s*')
   md.block.register_rule('quote', QUOTE_REGEX, parseQuote)
   md.block.rules.append('quote')
 
@@ -188,9 +191,10 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
     #TODO(kadircet): Also send photos as attachments
     return f'[{escape(title)}]({src})'
 
-  def quote(self, children, user, post_id, topic_id):
-    logger.debug('quote: {} {} {} {}', user, post_id, topic_id, children)
-    text = ''.join(children).replace('\n', '\n> ')
+  def quote(self, children, user, post_id, topic_id, *args):
+    logger.debug('quote: {} {} {} {}', user, post_id, topic_id, children,
+                 ''.join(*args))
+    text = '\n\n'.join(children).replace('\n', '\n\\> ')
     return (f'\\> [@{user}](https://cow.ceng.metu.edu.tr/u/{user}) in '
             f'[post](https://cow.ceng.metu.edu.tr/t/{topic_id}/{post_id}):\n'
             f'\\> _{text}_')
@@ -201,6 +205,7 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
 
 
 def convertDiscourseToTelegram(content):
+  logger.debug(f'Got discourse markdown: {content}')
   renderer = telegramRenderer()
   paragraphs = mistune.markdown(
       content, renderer=renderer, plugins=[pluginEmoji, pluginQuote])
