@@ -8,9 +8,13 @@ from database import dataBase
 from newsreader import newsReader
 from mention_manager import mentionManager
 from markdownrenderer import escape
+from logger import getLogger
+
+logger = getLogger(__name__)
 
 
 class cowBot(threading.Thread):
+  MAX_RETRIES = 3
 
   def __init__(self, conf, q):
     threading.Thread.__init__(self)
@@ -185,21 +189,31 @@ class cowBot(threading.Thread):
       msg = "You haven't added any aliases yet."
     self.sendMsg(cid, msg)
 
-  def makeRequest(self, data):
+  def makeRequest(self, data, depth=1):
     try:
       r = requests.post(self.url, json=data)
-      print('Request:', data)
+      logger.debug('Request: {}', data)
       res = r.json()
-      if res['ok'] != True:
-        if res['error_code'] == 403 and res['description'] in (
-            'Forbidden: bot was blocked by the user',
-            'Forbidden: user is deactivated'):
-          self.db.ping()
-          self.db.setUserStatus(data['chat_id'], 0)
-        print(data, res)
-      return res['ok'] == True
+      if res['ok']:
+        return True
+      if res['error_code'] == 403 and res['description'] in (
+          'Forbidden: bot was blocked by the user',
+          'Forbidden: user is deactivated'):
+        logger.info('Disabling user: {}', data['chat_id'])
+        self.db.ping()
+        self.db.setUserStatus(data['chat_id'], 0)
+        return False
+      if res['error_code'] == 429 and depth < MAX_RETRIES:
+        params = res.get('parameters', {})
+        wait = params.get('retry_after')
+        if wait:
+          logger.info('Hit flood control, retrying in {} secs', wait)
+          time.sleep(wait)
+          return self.makeRequest(data, depth + 1)
+      logger.error('Req {} failed with {}', data, res)
+      return False
     except Exception as e:
-      print(e, datetime.datetime.now())
+      logger.error('{} {}', e, datetime.datetime.now())
       traceback.print_exc()
     return False
 
