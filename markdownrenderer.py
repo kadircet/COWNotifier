@@ -206,6 +206,10 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
     logger.debug('linebreak')
     return '\n'
 
+  def newline(self):
+    logger.debug('newline')
+    return '\n'
+
 
 def convertDiscourseToTelegram(content):
   logger.debug(f'Got discourse markdown: {content}')
