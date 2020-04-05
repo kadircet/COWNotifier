@@ -49,7 +49,7 @@ class cowBot(threading.Thread):
               if not user[1] or not msg.isPlusOne():
                 self.sendArticle(user[0], msg)
       except Exception as e:
-        print(e, datetime.datetime.now())
+        logger.error('{} {}', e, datetime.datetime.now())
         traceback.print_exc()
       time.sleep(10)
 
@@ -222,10 +222,10 @@ class cowBot(threading.Thread):
       r = requests.post(self.url, files=files, data=data)
       res = r.json()
       if res['ok'] != True:
-        print(data, res)
+        logger.error('Multi part req {} failed with {}', data, res)
       return res
     except Exception as e:
-      print(e, datetime.datetime.now())
+      logger.error('{} {}', e, datetime.datetime.now())
       traceback.print_exc()
     return False
 
@@ -238,9 +238,9 @@ class cowBot(threading.Thread):
     data['method'] = 'setWebhook'
     data['url'] = url
     files = {'certificate': open(pubkey, 'rb')}
-    resp = requests.post(self.url, data=data, files=files)
-    if resp == False:
-      print('Failed to set webhook!')
+    resp = requests.post(self.url, data=data, files=files).json()
+    if resp['ok'] == False:
+      logger.error('Failed to set webhook {} - {}', data, resp)
       sys.exit(1)
 
   def registerTexts(self):
@@ -406,7 +406,7 @@ Source is available at https://github.com/kadircet/COWNotifier
         data = self.q.get()
         self.process(data)
       except Exception as e:
-        print(e)
+        logger.error('{}', e)
         traceback.print_exc()
       sys.stdout.flush()
       sys.stderr.flush()
