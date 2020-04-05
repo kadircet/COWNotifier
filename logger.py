@@ -23,4 +23,4 @@ class StyleAdapter(logging.LoggerAdapter):
 
 
 def getLogger(name):
-  return StyleAdapter(logging.getLogger(__name__))
+  return StyleAdapter(logging.getLogger(name))
