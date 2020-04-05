@@ -202,6 +202,10 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
     text = '\n\n'.join(children).replace('\n', '\n\\> ')
     return f'\\> _{text}_'
 
+  def linebreak(self):
+    logger.debug('linebreak')
+    return '\n'
+
 
 def convertDiscourseToTelegram(content):
   logger.debug(f'Got discourse markdown: {content}')
