@@ -163,10 +163,10 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
           len(self.UPLOAD_SCHEME):]
     if children is None:
       if title is None:
-        children = [link]
+        children = [escape(link)]
       else:
         children = title
-    text = escape(''.join(children))
+    text = ''.join(children)
     return f'[{text}]({link})'
 
   def image(self, src, alt='', title=None):
