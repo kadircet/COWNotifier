@@ -195,14 +195,14 @@ class cowBot(threading.Thread):
       logger.debug('Request: {}', data)
       res = r.json()
       if res['ok']:
-        return True
+        return True, res
       if res['error_code'] == 403 and res['description'] in (
           'Forbidden: bot was blocked by the user',
           'Forbidden: user is deactivated'):
         logger.info('Disabling user: {}', data['chat_id'])
         self.db.ping()
         self.db.setUserStatus(data['chat_id'], 0)
-        return False
+        return False, res
       if res['error_code'] == 429 and depth < MAX_RETRIES:
         params = res.get('parameters', {})
         wait = params.get('retry_after')
@@ -211,11 +211,11 @@ class cowBot(threading.Thread):
           time.sleep(wait)
           return self.makeRequest(data, depth + 1)
       logger.error('Req {} failed with {}', data, res)
-      return False
+      return False, res
     except Exception as e:
       logger.error('{} {}', e, datetime.datetime.now())
       traceback.print_exc()
-    return False
+    return False, res
 
   def makeMultiPartRequest(self, files, data):
     try:
@@ -323,8 +323,17 @@ Source is available at https://github.com/kadircet/COWNotifier
     while len(text):
       data['text'] = text[:4096]
       text = text[4096:]
-      res = self.makeRequest(data)
-      if not res:
+      status, res = self.makeRequest(data)
+      # Failed to send message, try to recover.
+      if res.get('error_code') == 400 and res.get(
+          'description', '').startswith('Bad Request: can\'t parse entities:'):
+        # In case of a bad markdown syntax, try with plaintext.
+        del data['parse_mode']
+        status, _ = self.makeRequest(data)
+        # Restore parse_mode for remaining blocks.
+        data['parse_mode'] = 'MarkdownV2'
+
+      if not status:
         break
     return
 
