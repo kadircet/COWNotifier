@@ -6,6 +6,9 @@ import traceback
 import threading
 import json
 import socket
+from logger import getLogger
+
+logger = getLogger(__name__)
 
 
 class webHook(threading.Thread):
@@ -20,10 +23,10 @@ class webHook(threading.Thread):
           data = self.rfile.read(int(
               self.headers['Content-Length'])).decode('utf-8')
           data = json.loads(data)
-          print(data)
+          logger.debug('Received {}', data)
           self.q.put(data)
       except Exception as e:
-        print(e, datetime.datetime.now())
+        logger.error('{} {}', e, datetime.datetime.now())
         traceback.print_exc()
 
     def do_POST(self):
