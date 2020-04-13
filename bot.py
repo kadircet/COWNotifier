@@ -125,7 +125,7 @@ class cowBot(threading.Thread):
       self.sendMsg(data['cid'], self.texts['invalid'])
       return
 
-    topic = text[1]
+    topic = ' '.join(text[1:])
     self.db.ping()
     res, deleted_topic = self.db.deleteTopic(data['cid'], topic)
 
