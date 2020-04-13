@@ -136,8 +136,12 @@ class newsReader:
     if topics == None:
       topics = self.categories.values()
     pos = []
+    topic = topic.lower()
     for t in topics:
-      if t.lower().endswith(topic.lower()):
+      t_lower = t.lower()
+      if t_lower == topic.lower():
+        return [t]
+      if topic in t_lower:
         pos.append(t)
     return pos
 
