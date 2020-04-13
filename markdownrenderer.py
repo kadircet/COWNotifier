@@ -210,6 +210,10 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
     logger.debug('newline')
     return '\n'
 
+  def inline_html(self, text):
+    logger.debug('inline_html {}', text)
+    return escape(text)
+
 
 def convertDiscourseToTelegram(content):
   logger.debug(f'Got discourse markdown: {content}')
