@@ -156,17 +156,17 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
     text += '\n```'
     return text
 
-  def link(self, link, children=None, title=None):
-    logger.debug('link: {} {} {}', link, children, title)
+  def link(self, link, text=None, title=None):
+    logger.debug('link: {} {} {}', link, text, title)
     if link.startswith(self.UPLOAD_SCHEME):
       link = 'https://cow.ceng.metu.edu.tr/uploads/short-url/' + link[
           len(self.UPLOAD_SCHEME):]
-    if children is None:
+    if text is None:
       if title is None:
-        children = [escape(link)]
+        text = link
       else:
-        children = title
-    text = ''.join(children)
+        text = title
+    text = escape(text)
     return f'[{text}]({link})'
 
   def image(self, src, alt='', title=None):
