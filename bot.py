@@ -7,7 +7,7 @@ import threading
 from database import dataBase
 from newsreader import newsReader
 from mention_manager import mentionManager
-from markdownrenderer import escape
+from markdownrenderer import escape, unescape
 from logger import getLogger
 
 logger = getLogger(__name__)
@@ -327,6 +327,7 @@ Source is available at https://github.com/kadircet/COWNotifier
       # Failed to send message, try to recover.
       if res.get('error_code') == 400 and res.get(
           'description', '').startswith('Bad Request: can\'t parse entities:'):
+        data['text'] = unescape(data['text'])
         # In case of a bad markdown syntax, try with plaintext.
         del data['parse_mode']
         status, _ = self.makeRequest(data)

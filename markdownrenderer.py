@@ -51,6 +51,36 @@ def pluginQuote(md):
   md.block.rules.append('quote')
 
 
+def unescape(text):
+  """Unescapes punctuation and drops markdown markers in text."""
+  toEscape = {
+      False: [
+          '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|',
+          '{', '}', '.', '!'
+      ],
+      True: ['`', '\\']
+  }
+
+  res = ''
+  i = 0
+  insideCodeBlock = False
+  while i < len(text):
+    # strip markdown markers.
+    if text[i] in toEscape[insideCodeBlock]:
+      if text[i] == '`':
+        insideCodeBlock = not insideCodeBlock
+      i += 1
+      continue
+    # if this is a backslash and the next char is punctuation, print that one
+    # instead.
+    if text[i] == '\\':
+      if i + 1 < len(text) and text[i + 1] in toEscape[insideCodeBlock]:
+        i += 1
+    res += text[i]
+    i += 1
+  return res
+
+
 def escape(text, inCodeBlock=False):
   """Escapes characters specified in toEscape by prepending bachslashes.
 
