@@ -23,7 +23,7 @@ class webHook(threading.Thread):
           data = self.rfile.read(int(
               self.headers['Content-Length'])).decode('utf-8')
           data = json.loads(data)
-          logger.debug('Received {}', data)
+          logger.info('Received {}', data)
           self.q.put(data)
       except Exception as e:
         logger.error('{} {}', e, datetime.datetime.now())
