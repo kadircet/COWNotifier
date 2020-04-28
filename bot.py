@@ -399,7 +399,7 @@ Source is available at https://github.com/kadircet/COWNotifier
     if cmd[0] != '/':
       self.sendMsg(cid, "Master didn't make me a chatty bot!")
       return
-    cmd = cmd[1:]
+    cmd = cmd[1:].lower()
 
     if cmd not in self.handlers:
       self.sendMsg(cid, "Master didn't implement it yet!")
