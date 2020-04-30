@@ -203,7 +203,7 @@ class cowBot(threading.Thread):
         self.db.ping()
         self.db.setUserStatus(data['chat_id'], 0)
         return False, res
-      if res['error_code'] == 429 and depth < MAX_RETRIES:
+      if res['error_code'] == 429 and depth < self.MAX_RETRIES:
         params = res.get('parameters', {})
         wait = params.get('retry_after')
         if wait:
