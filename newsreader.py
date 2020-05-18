@@ -184,6 +184,9 @@ class newsReader:
         start -= 1
         break
       topic = topic.json()
+      if topic['category_id'] not in self.categories:
+        logger.error('Unknown category_id: {}', topic['category_id'])
+        continue
       if topic['category_id'] not in res:
         res[topic['category_id']] = []
       # TODO(kadircet): Also include link to the post via topic_id and post_count.
