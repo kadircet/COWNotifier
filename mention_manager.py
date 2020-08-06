@@ -12,8 +12,8 @@ class mentionManager:
     self.student_no_matcher = re.compile("e?\d{6,7}")
     self.db = db
     self.cow_bot = cow_bot
-    self.mention_text = "Your alias <b>{}</b> has been mentioned in " + \
-            "newsgroup: <b>{}</b> with header: <b>{}</b> at line: {}."
+    self.mention_text = "Your alias *{}* has been mentioned in " + \
+            "newsgroup: *{}* with header: *{}* at line: {}."
 
   def sendMention(self, cid, alias, newsgroup, header, line_no):
     return self.cow_bot.sendMsg(
