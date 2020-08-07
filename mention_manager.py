@@ -34,7 +34,7 @@ class mentionManager:
     line_no = 0
     for raw_line in content.split("\n"):
       line = raw_line.strip()
-      if line.startswith(">"):
+      if line.startswith("> "):
         continue
       student_no = self.isStudentNumber(line)
       if student_no is not None:
