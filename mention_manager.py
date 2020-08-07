@@ -1,5 +1,4 @@
 import re
-import html
 
 from markdownrenderer import escape
 
