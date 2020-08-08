@@ -1,5 +1,6 @@
 import re
-import html
+
+from markdownrenderer import escape
 
 
 class mentionManager:
@@ -12,15 +13,15 @@ class mentionManager:
     self.student_no_matcher = re.compile("e?\d{6,7}")
     self.db = db
     self.cow_bot = cow_bot
-    self.mention_text = "Your alias <b>{}</b> has been mentioned in " + \
-            "newsgroup: <b>{}</b> with header: <b>{}</b> at line: {}."
+    self.mention_text = "Your alias *{}* has been mentioned in " + \
+            "newsgroup: *{}* with header: *{}* at line: {}\."
 
   def sendMention(self, cid, alias, newsgroup, header, line_no):
     return self.cow_bot.sendMsg(
         cid,
         self.mention_text.format(
-            html.escape(alias), html.escape(newsgroup), html.escape(header),
-            line_no))
+            escape(alias), escape(newsgroup), escape(header), line_no),
+        escaped=True)
 
   def getMinimalStudentNo(self, student_no):
     base = student_no
@@ -34,7 +35,7 @@ class mentionManager:
     line_no = 0
     for raw_line in content.split("\n"):
       line = raw_line.strip()
-      if line.startswith("&gt"):
+      if line.startswith("> "):
         continue
       student_no = self.isStudentNumber(line)
       if student_no is not None:
