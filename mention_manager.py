@@ -2,6 +2,7 @@ import re
 
 from markdownrenderer import escape
 
+
 class mentionManager:
 
   def isStudentNumber(self, msg):
@@ -19,8 +20,8 @@ class mentionManager:
     return self.cow_bot.sendMsg(
         cid,
         self.mention_text.format(
-            escape(alias), escape(newsgroup), escape(header),
-            line_no), escaped=True)
+            escape(alias), escape(newsgroup), escape(header), line_no),
+        escaped=True)
 
   def getMinimalStudentNo(self, student_no):
     base = student_no
