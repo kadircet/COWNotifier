@@ -1,8 +1,9 @@
+import datetime
 import mistune
-import string
 import re
+import requests
+import string
 
-from emoji_codepoints import emoji
 from logger import getLogger
 """Converts discourse markdown into a telegram compatible version."""
 
@@ -102,6 +103,42 @@ def escape(text, inCodeBlock=False):
   return res
 
 
+def emojiShortCodeToUnicode(shortcode):
+  """Converts an emoji short code (+1) to its unicode equivalent.
+
+  Uses github api to build a shortcode to unicode mapping.
+  """
+  # Build and cache the mapping at first request, if something fails keep using
+  # shortcodes as a fallback.
+  if not hasattr(emojiShortCodeToUnicode, 'mapping'):
+    try:
+      mapping = requests.get('https://api.github.com/emojis').json()
+      for key, value in mapping.items():
+        # value can be in one of two forms:
+        # https://github.githubassets.com/images/icons/emoji/unicode/1f4a4.png?v8
+        # https://github.githubassets.com/images/icons/emoji/atom.png?v8
+        # We drop the non-unicode ones.
+        if '/unicode/' not in value:
+          mapping[key] = key
+          continue
+        # For unicode ones, sometimes there are multiple code points, e.g:
+        # https://github.githubassets.com/images/icons/emoji/unicode/1f1e6-1f1fa.png?v8
+        value = value.split('/')[-1].split('.png')[0].split('-')
+        value = ''.join(map(lambda codepoint: chr(int(codepoint, 16)), value))
+        mapping[key] = value
+      emojiShortCodeToUnicode.mapping = mapping
+    except Exception as e:
+      logger.error('{} {}', e, datetime.datetime.now())
+      traceback.print_exc()
+      emojiShortCodeToUnicode.mapping = {}
+
+  unic = emojiShortCodeToUnicode.mapping.get(unescape(shortcode), None)
+  if not unic:
+    unic = f':{shortcode}:'
+    logger.debug('unknown shortcode: {0}', shortcode)
+  return unic
+
+
 class telegramRenderer(mistune.renderers.BaseRenderer):
   """Renderer to convert discourse markdown into telegram supported dialect."""
   NAME = 'telegram'
@@ -136,8 +173,7 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
 
   def emoji(self, children):
     logger.debug('emoji: {}', children)
-    text = f':{"".join(children)}:'
-    return emoji.get(text, f'{text}')
+    return emojiShortCodeToUnicode(''.join(children))
 
   def list(self, children_and_levels, ordered, depth, start=None):
     logger.debug('list: {} {} {} {}', children_and_levels, ordered, depth,
