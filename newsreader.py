@@ -196,6 +196,7 @@ class newsReader:
               self.categories[topic['category_id']],
               topic['title'],
               (post['created_at'], self.timezone),
+              f'{self.conparams[0]}p/{post["id"]}',
               post['raw'],  # raw msg (markdown)
               mention_manager))
     self.last_post = start
