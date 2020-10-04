@@ -30,13 +30,14 @@ def getHumanReadableDate(date):
 
 class newsArticle:
 
-  def __init__(self, author, topic, subject, date, dc_markdown,
+  def __init__(self, author, topic, subject, date, url, dc_markdown,
                mention_manager):
     self.author_username = author[0]
     self.author_displayname = author[1]
     self.topic = topic
     self.subject = subject
     self.date = getHumanReadableDate(date)
+    self.url = url
     self.dc_markdown = dc_markdown
     self.mention_manager = mention_manager
     self.broken = False
@@ -63,7 +64,8 @@ class newsArticle:
         f"Subject: {self.subject}\n"\
         f"Date: {self.date}\n"\
         f"is_plus_one: {self.isPlusOne()}"
-    return '```\n' + escape(hdr, True) + '\n```\n'
+    link_to_post = f'[Open post]({self.url})\n'
+    return link_to_post + '```\n' + escape(hdr, True) + '\n```\n'
 
   def parseMessage(self):
     if self.broken:
