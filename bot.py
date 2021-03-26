@@ -320,6 +320,7 @@ Source is available at https://github.com/kadircet/COWNotifier
     data['method'] = 'sendMessage'
     data['chat_id'] = cid
     data['parse_mode'] = 'MarkdownV2'
+    data['disable_web_page_preview'] = True
     while len(text):
       data['text'] = text[:4096]
       text = text[4096:]
