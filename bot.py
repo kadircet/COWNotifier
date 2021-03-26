@@ -194,6 +194,7 @@ class cowBot(threading.Thread):
       r = requests.post(self.url, json=data)
       logger.debug('Request: {}', data)
       res = r.json()
+      logger.debug('Response: {}', res)
       if res['ok']:
         return True, res
       if res['error_code'] == 403 and res['description'] in (
