@@ -43,6 +43,7 @@ class newsArticle:
     self.broken = False
     self.tg_markdown = None
     self.is_plus_one = None
+    self.attachments = None
 
   def isPlusOne(self):
     if self.is_plus_one is None:
@@ -55,8 +56,10 @@ class newsArticle:
       self.parseMessage()
     return self.tg_markdown
 
-  # TODO: getAttachemnts:
-  #  Extract the images and files in the message
+  def getAttachments(self):
+    if self.attachments is None:
+      self.parseMessage()
+    return self.attachments
 
   def makeHeader(self):
     hdr = f"From: {self.author_username}({self.author_displayname})\n"\
@@ -73,8 +76,9 @@ class newsArticle:
 
     try:
       self.mention_manager.parseMentions(self.dc_markdown, self.topic)
-      paragraphs = convertDiscourseToTelegram(self.dc_markdown)
+      paragraphs, attachments = convertDiscourseToTelegram(self.dc_markdown)
       self.tg_markdown = self.makeHeader() + '\n\n'.join(paragraphs)
+      self.attachments = attachments
     except Exception as e:
       logger.error('{} {}', e, datetime.datetime.now())
       traceback.print_exc()

@@ -217,18 +217,6 @@ class cowBot(threading.Thread):
       traceback.print_exc()
     return False, res
 
-  def makeMultiPartRequest(self, files, data):
-    try:
-      r = requests.post(self.url, files=files, data=data)
-      res = r.json()
-      if res['ok'] != True:
-        logger.error('Multi part req {} failed with {}', data, res)
-      return res
-    except Exception as e:
-      logger.error('{} {}', e, datetime.datetime.now())
-      traceback.print_exc()
-    return False
-
   def setWebhook(self, url, pubkey):
     data = {}
 
@@ -309,7 +297,8 @@ Source is available at https://github.com/kadircet/COWNotifier
 
   def sendArticle(self, cid, article):
     self.sendMsg(cid, article.parse(), escaped=True)
-    # TODO: Send attachments
+    for attachment in article.getAttachments():
+      self.sendAttachment(cid, attachment)
 
   def sendMsg(self, cid, text, escaped=False):
     if text is None:
@@ -342,18 +331,8 @@ Source is available at https://github.com/kadircet/COWNotifier
     data = {}
     data['method'] = 'sendDocument'
     data['chat_id'] = cid
-    if attachment.file_id:
-      data['document'] = attachment.file_id
-      self.makeRequest(data)
-    else:
-      files = {
-          'document': (attachment.name, attachment.content, attachment.type)
-      }
-
-      res = self.makeMultiPartRequest(files, data)
-      if res:
-        attachment.file_id = res['result']['document']['file_id']
-        attachment.content = None
+    data['document'] = attachment.url
+    self.makeRequest(data)
 
   def parse(self, data):
     res = {}

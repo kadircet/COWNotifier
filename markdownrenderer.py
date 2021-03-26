@@ -139,6 +139,11 @@ def emojiShortCodeToUnicode(shortcode):
   return unic
 
 
+class telegramAttachment:
+  def __init__(self, url):
+    self.url = url
+
+
 class telegramRenderer(mistune.renderers.BaseRenderer):
   """Renderer to convert discourse markdown into telegram supported dialect."""
   NAME = 'telegram'
@@ -147,6 +152,10 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
 
   def __init__(self):
     super(telegramRenderer, self).__init__()
+    self.attachments = []
+
+  def takeAttachments(self):
+    return self.attachments
 
   def createDefaultHandler(self, name):
     logger.error('Creating default method for unhandled rule: {}', name)
@@ -227,6 +236,7 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
     if link.startswith(self.UPLOAD_SCHEME):
       link = 'https://cow.ceng.metu.edu.tr/uploads/short-url/' + link[
           len(self.UPLOAD_SCHEME):]
+      self.attachments.append(telegramAttachment(link))
     if text is None:
       if title is None:
         text = link
@@ -244,7 +254,7 @@ class telegramRenderer(mistune.renderers.BaseRenderer):
     if src.startswith(self.UPLOAD_SCHEME):
       src = 'https://cow.ceng.metu.edu.tr/uploads/short-url/' + src[
           len(self.UPLOAD_SCHEME):]
-    #TODO(kadircet): Also send photos as attachments
+      self.attachments.append(telegramAttachment(src))
     return f'[{escape(title)}]({src})'
 
   def quote(self, children, user, post_id, topic_id, *args):
@@ -286,4 +296,4 @@ def convertDiscourseToTelegram(content):
   renderer = telegramRenderer()
   paragraphs = mistune.markdown(
       content, renderer=renderer, plugins=[pluginEmoji, pluginQuote])
-  return paragraphs
+  return paragraphs, renderer.takeAttachments()
